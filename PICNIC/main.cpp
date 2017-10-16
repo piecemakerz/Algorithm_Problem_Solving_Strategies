@@ -94,3 +94,80 @@ int countPairings(bool taken[10]) {
 	}
 	return ret;
 }
+
+/* 알고스팟 제출용 답안
+#include <vector>
+#include <algorithm>
+#include <iostream>
+#include <cstdio>
+
+#define MAX_NUM_STUDENTS 10
+
+using namespace std;
+int testCase;
+bool Selected[MAX_NUM_STUDENTS] = { false, };
+int numOfSelectedStudents = 0;
+int numOfStudents, numOfFriendPairs;
+
+int FindNumOfPairingWays(vector<pair<int, int>>& pairs, int idx = 0);
+
+int main(void) {
+	int st1, st2;
+
+	cin >> testCase;
+
+	for (int i = 0; i < testCase; i++) {
+		cin >> numOfStudents >> numOfFriendPairs;
+
+		vector<pair<int, int>> pairs;
+
+		for (int i = 0; i < numOfFriendPairs; i++) {
+			cin >> st1 >> st2;
+			pairs.push_back(make_pair(st1, st2));
+		}
+		
+		cout << FindNumOfPairingWays(pairs) << endl;
+		numOfSelectedStudents = 0;
+		for (int i = 0; i < MAX_NUM_STUDENTS; i++) {
+			Selected[i] = false;
+		}
+	}
+	return 0;
+}
+
+
+//해결하는데 굉장히 오래걸림.
+//오류가 발생했던 코드의 경우, 선택되지 않은 학생들을 포함하고 있는 친구쌍에 대하여
+//그 친구쌍을 선택하거나 선택하지 않는 두 가지 경우로 나눠 재귀호출을 했다.
+//또한 선택된 학생들을 포함하고 있는 친구쌍은 return 0를 이용해 재귀호출을 생략하고 바로 리턴해 주었다.
+//이 때 빠뜨린 부분은, 선택된 학생들을 포함하고 있는 친구쌍에 대해서도 선택하지 않는 경우에 대해서도
+//재귀호출을 구현했어야 한다는 것이다.
+//따라서, <해당 친구쌍이 선택되지 않은 학생들을 포함하고 있는 경우> => 선택하는 경우와 선택하지 않는 경우에 대해 모두 재귀호출 구현
+//	      <해당 친구쌍이 선택된 학생을 포함하고 있는 경우> => 선택하지 않는 경우에 대한 재귀호출 구현
+//의 형식으로 알고리즘을 구현해야 한다.
+
+int FindNumOfPairingWays(vector<pair<int, int>>& pairs, int idx) {
+	int numOfWays = 0;
+	
+	if (numOfSelectedStudents == numOfStudents)
+		return 1;
+	
+	if (idx >= numOfFriendPairs)
+		return 0;
+	
+	int std1 = pairs[idx].first, std2 = pairs[idx].second;
+
+	if (!Selected[std1] && !Selected[std2]) {
+		
+		Selected[std1] = true, Selected[std2] = true;
+		numOfSelectedStudents += 2;
+		numOfWays += FindNumOfPairingWays(pairs, idx + 1);
+		numOfSelectedStudents -= 2;
+		Selected[std1] = false, Selected[std2] = false;
+	}
+
+	numOfWays += FindNumOfPairingWays(pairs, idx+1);
+
+	return numOfWays;
+}
+*/
