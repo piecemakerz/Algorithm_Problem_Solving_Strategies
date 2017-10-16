@@ -1,6 +1,3 @@
-#include <stdlib.h>
-#include <vector>
-#include <algorithm>
 #include <iostream>
 #include <cstdio>
 #include <string>
@@ -62,37 +59,74 @@ bool hasWordMine(int y, int x, char * word, int picked = 1) {
 	return false;
 }
 
-// 직접 구현한 함수2
-/*char box[BOGGLE_LEN][BOGGLE_LEN] = { { 'N','N','N','N','S' },
-{ 'N','E','E','E','N' },
-{ 'N','E','Y','E','N' },
-{ 'N','E','E','E','N' },
-{ 'N','N','N','N','N' } };
-
-bool checked[BOGGLE_LEN][BOGGLE_LEN] = { false, };
-
-bool hasWord(int, int, string);
-void ShowBoard();
-
-int main()
-{
-	int x = 2, y = 2;
-	string word;
-	ShowBoard();
-	printf("\nType Word to Find : ");
-	cin >> word;
-	cout<<hasWord(y, x, word)<<endl;
+int main(void) {
+	printf("%d\n", hasWord(2, 2, "YES"));
+	printf("%d\n", hasWordMine(2, 2, "YES"));
 	return 0;
 }
 
-bool hasWord(int y, int x, string word) {
-	bool hasword = false;
+//알고스팟 채점용 함수. 너무 느려서 문제 해결은 할 수 없으나 입력에 따른 출력은 맞게 나온다.
+/*
+#include <iostream>
+#include <cstdio>
+#include <string>
 
+#define BOGGLE_LEN 5
+using namespace std;
+
+char box[BOGGLE_LEN][BOGGLE_LEN];
+int testCase;
+int words;
+bool hasWord(int, int, const string&);
+void CheckingProcedure(const string& inputString);
+
+int main()
+{
+	cin >> testCase;
+
+	for (int t = 0; t < testCase; t++) {
+
+		for (int i = 0; i < BOGGLE_LEN; i++)
+			for (int j = 0; j < BOGGLE_LEN; j++)
+				cin >> box[i][j];
+
+		cin >> words;
+
+		string * inputStrings = new string[words];
+
+		for (int i = 0; i < words; i++)
+			cin >> inputStrings[i];
+
+		for (int i = 0; i < words; i++) {
+			CheckingProcedure(inputStrings[i]);
+		}
+	}
+
+	return 0;
+}
+
+void CheckingProcedure(const string& inputString) {
+	int startx, starty;
+
+	for (int i = 0; i < BOGGLE_LEN; i++) {
+		for (int j = 0; j < BOGGLE_LEN; j++) {
+			if (inputString[0] == box[i][j]) {
+				starty = i, startx = j;
+				if (hasWord(starty, startx, inputString)) {
+					cout << inputString << " " << "YES" << endl;
+					return;
+				}
+			}
+		}
+	}
+
+	cout << inputString << " " << "NO" << endl;
+}
+
+bool hasWord(int y, int x, const string& word) {
 	if ((y >= BOGGLE_LEN || y < 0) || (x >= BOGGLE_LEN || x < 0)) {
 		return false;
 	}
-
-	checked[y][x] = true;
 
 	if (word[0] == box[y][x]) {
 
@@ -102,31 +136,15 @@ bool hasWord(int y, int x, string word) {
 		else {
 			for (int i = -1; i <= 1; i++) {
 				for (int j = -1; j <= 1; j++) {
-					if ((i == 0 && j == 0) || checked[y+i][x+j] == true)
+					if (i == 0 && j == 0)
 						continue;
 					if (hasWord(y + i, x + j, word.substr(1)))
-						hasword = true;
+						return true;
 				}
 			}
 		}
 	}
 
-	return hasword;
-}
-
-void ShowBoard() {
-	for (int i = 0; i < BOGGLE_LEN; i++) {
-		for (int j = 0; j < BOGGLE_LEN; j++) {
-			printf("%c ", box[i][j]);
-		}
-		printf("\n");
-	}
+	return false;
 }
 */
-
-int main(void) {
-	printf("%d\n", hasWord(2, 2, "YES"));
-	printf("%d\n", hasWordMine(2, 2, "YES"));
-	return 0;
-}
-
