@@ -193,12 +193,19 @@ void CheckEveryBoardCoverWays(char ** boardArray, int numOfBlack, int y, int x) 
 }
 
 /* 책의 풀이
-const int coverType[4][3][2]{
+#include <iostream>
+#include <cassert>
+#include <string>
+#include <utility>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+const int coverType[4][3][2] = {
 	{{0,0}, {1,0}, {0,1}},
 	{{0,0}, {0,1}, {1,1}},
 	{{0,0}, {1,0}, {1,1}},
-	{{0,0}, {1,0}, {1,-1}}
-};
+	{{0,0}, {1,0}, {1,-1}} };
 
 bool set(vector<vector<int>>& board, int y, int x, int type, int delta) {
 	bool ok = true;
@@ -216,18 +223,17 @@ bool set(vector<vector<int>>& board, int y, int x, int type, int delta) {
 int cover(vector<vector<int>>& board) {
 	int y = -1, x = -1;
 	for (int i = 0; i < board.size(); i++) {
-		for (int j = 0; j < board[i].size(); j++) {
+		for(int j=0; j<board[i].size(); j++)
 			if (board[i][j] == 0) {
 				y = i;
 				x = j;
 				break;
 			}
-		}
-		if (y != -1)
-			break;
+		if (y != -1) break;
 	}
 
 	if (y == -1) return 1;
+
 	int ret = 0;
 	for (int type = 0; type < 4; type++) {
 		if (set(board, y, x, type, 1))
@@ -237,29 +243,29 @@ int cover(vector<vector<int>>& board) {
 	return ret;
 }
 
-int main(void) {
-	int testtime;
-	int H, W;
-	char input;
-	scanf("%d", &testtime);
-
-	for (int i = 0; i < testtime; i++) {
-		scanf("%d %d", &H, &W);
-		vector<vector<int>> arr(H, vector<int>(W, 0));
+int main() {
+	int cases;
+	cin >> cases;
+	assert(cases <= 30);
+	while (cases--) {
+		int H, W;
+		cin >> H >> W;
+		assert(1 <= H && H <= 20 && 1 <= W && W <= 20);
+		vector<vector<int>> board(H, vector<int>(W, 0));
+		int whites = 0;
 
 		for (int i = 0; i < H; i++) {
+			string s;
+			cin >> s;
 			for (int j = 0; j < W; j++) {
-				scanf("%c", &input);
-				if (input == '#')
-					arr[i][j] = 1;
-				if (input == '\n') {
-					j--;
-					continue;
-				}
+				if (s[j] == '#')
+					board[i][j] = 1;
 			}
+			whites += count(board[i].begin(), board[i].end(), 0);
 		}
-		printf("%d\n",cover(arr));
-		arr.clear();
+		assert(whites <= 50);
+		int ways = cover(board);
+		cout << ways << endl;
 	}
 }
 */

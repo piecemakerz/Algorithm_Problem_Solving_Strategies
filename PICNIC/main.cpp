@@ -73,7 +73,10 @@ int FindFriendsLineWay(vector<pair<int, int>>& list, int * prevSelected, int sel
 
 /*Ã¥ÀÇ ´ä
 
-#include <cstring>
+#include<cassert>
+#include<vector>
+#include<iostream>
+#include<cstring>
 using namespace std;
 
 int n, m;
