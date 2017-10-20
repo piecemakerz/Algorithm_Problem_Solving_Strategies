@@ -70,23 +70,28 @@ int FindFriendsLineWay(vector<pair<int, int>>& list, int * prevSelected, int sel
 }
 */
 
-// 책의 답
-int n;
+
+/*책의 답
+
+#include <cstring>
+using namespace std;
+
+int n, m;
 bool areFriends[10][10];
 
-int countPairings(bool taken[10]) {
+int countPairings(bool taken[10]){
 	int firstFree = -1;
-	for (int i = 0; i < n; i++) {
-		if (!taken[i]) {
+	for(int i=0; i<(n); i++){
+		if(!taken[i]){
 			firstFree = i;
 			break;
 		}
 	}
-	if (firstFree == -1) return 1;
-	int ret = 0;
 
-	for (int pairWith = firstFree + 1; pairWith < n; ++pairWith) {
-		if (!taken[pairWith] && areFriends[firstFree][pairWith]) {
+	if(firstFree == -1) return 1;
+	int ret = 0;
+	for(int pairWith = (firstFree+1); pairWith < (n); pairWith++){
+		if(!taken[pairWith] && areFwriends[firstFree][pairWith]){
 			taken[firstFree] = taken[pairWith] = true;
 			ret += countPairings(taken);
 			taken[firstFree] = taken[pairWith] = false;
@@ -95,7 +100,29 @@ int countPairings(bool taken[10]) {
 	return ret;
 }
 
-/* 알고스팟 제출용 답안
+int main()[
+	int cases;
+	cin>>cases;
+	while(cases--){
+		cin>>n>>m;
+		assert(n <= 10);
+		memset(areFriends, 0, sizeof(areFriends));
+		for(int i=0; i<(m); i++){
+			int a,b;
+			cin>>a>>b;
+			assert(0<=a && a<n && 0<=b && b<n);
+			assert(!areFriends[a][b]);
+			areFriends[a][b] = areFriends[b][a] = true;
+		}
+		bool taken[10];
+		memset(taken, 0, sizeof(taken));
+		cout<<countPairings(taken)<<endl;
+	}
+}
+
+*/
+
+//알고스팟 제출용 답안
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -170,4 +197,3 @@ int FindNumOfPairingWays(vector<pair<int, int>>& pairs, int idx) {
 
 	return numOfWays;
 }
-*/
