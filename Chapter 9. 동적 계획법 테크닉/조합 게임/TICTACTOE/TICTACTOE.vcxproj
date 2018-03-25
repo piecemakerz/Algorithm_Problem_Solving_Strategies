@@ -20,9 +20,9 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{4686ECD1-7190-4F35-8494-905C6B1DDA29}</ProjectGuid>
+    <ProjectGuid>{ED7B26BF-4830-4DA2-BA98-446D22320210}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>GENIUS</RootNamespace>
+    <RootNamespace>TICTACTOE</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

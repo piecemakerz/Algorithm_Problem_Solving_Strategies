@@ -7,69 +7,19 @@
 #define MAX 15
 using namespace std;
 
-const int INF = 987654321;
 int k;
 string answer;
+const int MAX_N = 15;
 vector<string> stringParts;
-int myCache[MAX + 1][(1 << MAX) + 1];
-// 내가 처음에 짠 재귀호출 알고리즘. 메모이제이션을 적용할 수 없었다. (애초에 중복조건이 만들어질 수 없는 구조의 알고리즘이다.)
-int restore(string curString, int selected = 0) {
-	if (selected == (1 << k) - 1) {
-		if (curString.length() < answer.length() || answer.empty())
-			answer = curString;
-		return curString.length();
-	}
-
-	int minlength = INF;
-
-	for (int next = 0; next < k; next++) {
-		if (selected & (1 << next)) continue;
-
-		string checkStr = stringParts[next];
-		if (curString.empty())
-			minlength = min(minlength, restore(checkStr, selected + (1 << next)));
-
-		else {
-			int addLen;
-			bool checked = false;
-			for (int i = 0; i < curString.length(); i++) {
-				bool match = true;
-				addLen = 1;
-				if (checkStr[0] == curString[i]) {
-					for (int j = i + 1; j < curString.length() && (j - i) < checkStr.length(); j++) {
-						if (checkStr[j - i] != curString[j]) {
-							match = false;
-							break;
-						}
-						addLen++;
-					}
-
-					if (match) {
-						minlength = min(minlength, restore(curString + checkStr.substr(addLen, checkStr.length() - addLen), selected + (1 << next)));
-						checked = true;
-						break;
-					}
-				}
-			}
-			if (!checked)
-				minlength = min(minlength, restore(curString + checkStr, selected + (1 << next)));
-		}
-	}
-	return minlength;
-}
-
 //책의 알고리즘. 전처리 과정으로 아예 다른 문자열에 포함되는 문자열을 지워버렸으며,
 //알고리즘 중간에 겹치는 구간을 구했던 내 알고리즘과 달리 두 단어간의 겹치는 구간 길이를 미리 계산하여
 //overlap 2차원 배열에 저장했다.
 
-const int MAX_N = 15;
-//int k;
-//string word[MAX_N]; -> vector<string> stringParts로 대체함
 int cache[MAX_N][1 << MAX_N], overlap[MAX_N][MAX_N];
 
-//입력받은 문자열이 다른 문자열에 포함되는지 확인하는 함수. 포함된다면 true, 아니라면 false반환.
+//입력받은 문자열이 다른 문자열에 포함되는지 확인하고 완전히 포함된다면 그 문자열 조각을 벡터에서 삭제하는 함수.
 void EraseOverlapped() {
-	//arranging string vector in ascending order of string length
+	//문자열 조각들 길이순으로 정렬
 	int vectorLen = stringParts.size();
 	for (int i = 0; i < vectorLen - 1; i++) {
 		for (int j = i + 1; j < vectorLen; j++) {
@@ -81,7 +31,7 @@ void EraseOverlapped() {
 		}
 	}
 
-	//deleting included strings
+	//포함되는 문자열 조각 삭제
 	vector<string>::iterator iter;
 	for (int i = 0; i < vectorLen - 1; i++) {
 		for (int j = i + 1; j < vectorLen; j++) {
@@ -94,6 +44,7 @@ void EraseOverlapped() {
 		}
 	}
 }
+
 //두 단어간의 겹치는 구간 길이를 구하여 overlap 배열에 저장하는 함수
 void findOverlappedLength() {
 	for (int i = 0; i < k; i++) {

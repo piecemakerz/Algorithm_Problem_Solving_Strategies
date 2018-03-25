@@ -34,7 +34,11 @@ string myrestore(int selected = 0, int last = -1) {
 
 	//base case 2 - memoization
 	string& ret = mycache[last][selected];
-	if (!ret.empty()) return ret;
+	if (!ret.empty()) {
+		//mycache가 정확히 어떻게 쓰이는지 보기 위한 코드
+		//cout << "cache used in [" << last << "][" << selected << "]" << ret<<endl;
+		return ret;
+	}
 
 	string curString = mystringParts[last];
 	for (int next = 0; next < k; next++) {
@@ -188,7 +192,7 @@ string reconstruct(int last, int used) {
 void GenerateRandomString() {
 	static const string alpha = "abcdefghijklmnopqrstuvwxyz";
 	for (int i = 0; i < k; i++) {
-		int length = rand() % 7 + 1;
+		int length = rand() % 5 + 1;
 		string resultStr="";
 		for (int j = 0; j < length; j++) {
 			int select = rand() % alpha.length();
@@ -202,7 +206,7 @@ void GenerateRandomString() {
 int main(void) {
 	int C = 20;
 	for (int testCase = 0; testCase < C; testCase++) {
-		k = 6;
+		k = 5;
 		memset(cache, -1, sizeof(cache));
 		memset(overlap, 0, sizeof(overlap));
 		for (int i = 0; i < MAX + 1; i++) {
@@ -214,6 +218,13 @@ int main(void) {
 		EraseOverlapped();
 		k = stringParts.size();
 		findOverlappedLength();
+		//정렬된 문자열 목록 출력
+		/*cout << "---Arranged string---" << endl;
+		for (int i = 0; i < k; i++) {
+			cout << mystringParts[i] << endl;
+		}
+		cout << "----------------------" << endl;
+		*/
 		string myresultStr = myrestore();
 		restore(-1, 0);
 		string resultStr = stringParts[maxStart] + reconstruct(maxStart, 1 << maxStart);
