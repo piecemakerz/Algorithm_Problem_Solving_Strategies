@@ -11,12 +11,12 @@ const int INF = 987654321;
 int T, n, m;
 vector<string> friends;
 vector<int> food[50];//i번째 음식을 먹을 수 있는 친구 목록
-int checked[50]; //i번째 음식을 확인했는지 여부
 int friendEat[50]; //i번째 친구가 이미 먹을 수 있는 음식이 있는지의 여부
 int best;
-	
+//내 풀이
+/*
 //아직 먹을 수 있는 음식이 없는 사람들을 가장 많이 먹게 할 수 있는 음식 순으로 정렬.
-/*vector<pair<int,int>> arrangeMostUncommon() {
+	vector<pair<int,int>> arrangeMostUncommon() {
 	vector<pair<int,int>> foodCount(m);//겹치는 음식의 수
 	for (int i = 0; i < m; i++)
 		foodCount[i] = make_pair(0, i);
@@ -37,7 +37,7 @@ void arrangeFood() {
 				swap(food[i], food[j]);
 }
 
-int canEverybodyEat(int * ret) {
+int canEverybodyEat(const int * ret) {
 	for (int i = 0; i < n; i++)
 		if (ret[i] == 0)
 			return false;
@@ -81,8 +81,6 @@ bool heuristic(int curFood) {
 		ret[i] = friendEat[i];
 
 	for (int i = curFood; i < m; i++) {
-		if (checked[i])
-			continue;
 		for (int j = 0; j < food[i].size(); j++)
 			ret[food[i][j]] += 1;
 	}
@@ -90,24 +88,21 @@ bool heuristic(int curFood) {
 }
 
 void allergy(int choose, int curFood) {
-	//기저 사례: 현재 선택한 음식 수가 최적의 답 이상인 경우 리턴
+	//가지치기: 현재 선택한 음식 수가 최적의 답 이상인 경우 리턴
 	if (choose >= best)
 		return;
 	//기저 사례: 모든 친구들이 먹을 수 있다면 답 갱신
-	if (canEverybodyEat(friendEat)) {
-		best = min(best, choose);
+	if (curFood == m){
+		if(canEverybodyEat(friendEat))
+			best = min(best, choose);
 		return;
 	}
-	//기저 사례: 모든 음식을 검색해봤을 경우 리턴
-	if (curFood >= m)
-		return;
 
-	//남은 음식들을 모두 만든다고 해도 모든 친구들이 먹을 수 없을 때 리턴
+	//낙관적 휴리스틱: 남은 음식들을 모두 만든다고 해도 모든 친구들이 먹을 수 없을 때 리턴
 	if (!heuristic(curFood)) {
-		cout << "curFood: " << curFood << endl;
 		return;
 	}
-	checked[curFood] = 1;
+
 	//curFood를 고르는 경우
 	for (int i = 0; i < food[curFood].size(); i++)
 		friendEat[food[curFood][i]] += 1;
@@ -120,15 +115,42 @@ void allergy(int choose, int curFood) {
 	return;
 }
 
+//책의 답
+
+//canEat[i]: i번 친구가 먹을 수 있는 음식의 집합
+//eaters[i]: i번 음식을 먹을 수 있는 친구들의 집합
+vector<int> canEat[50], eaters[50];
+int best;
+//chosen: 지금까지 선택한 음식의 수
+//edible[i]: 지금까지 고른 음식 중 i번 친구가 먹을 수 있는 음식의 수
+void search(vector<int>& edible, int chosen) {
+	//간단한 가지치기
+	if (chosen >= best) return;
+	//아직 먹을 음식이 없는 첫 번째 친구를 찾는다.
+	int first = 0;
+	while (first < n && edible[first]>0)	first++;
+	//모든 친구가 먹을 음식이 있는 경우 종료한다.
+	if (first == n) { best = chosen; return; }
+	//이 친구가 먹을 수 있는 음식을 하나 만든다.
+	for (int i = 0; i < canEat[first].size(); i++) {
+		int food = canEat[first][i];
+		for (int j = 0; j < eaters[food].size(); j++)
+			edible[eaters[food][j]]++;
+		search(edible, chosen + 1);
+		for(int j=0; j<eaters[food].size(); j++)
+			edible[eaters[food][j]]++;
+	}
+}
 int main(void) {
 	cin >> T;
 	for (int testCase = 0; testCase < T; testCase++) {
-		memset(checked, 0, sizeof(checked));
 		memset(friendEat, 0, sizeof(friendEat));
 		best = INF;
 		string inputStr;
 		int canEatCount;
 		cin >> n >> m; // n = 친구 수, m = 음식 수
+		for (int i = 0; i < m; i++)
+			food[i] = vector<int>(0);
 
 		for (int i = 0; i < n; i++) {
 			cin >> inputStr;
