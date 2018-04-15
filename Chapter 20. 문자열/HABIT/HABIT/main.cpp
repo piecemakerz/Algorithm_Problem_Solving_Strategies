@@ -67,26 +67,32 @@ vector<int> getSuffixArray(const string& s) {
 	return perm;
 }
 
+//한 부분 문자열이 두번 이상 출현할 경우 이를 접두사를 갖는 접미사들은 항상 인접해 있다.
+//따라서 인접한 접미사들의 접두사가 동일하다면 이는 중복 출현하는 부분 문자열이다.
+
 int	longestPartialArray(const string& str) {
 	int n = str.length();
-	vector<int> suffix = getSuffixArray(str);
-	vector<int> length(n+1, 1); //길이가 i인 부분집합의 최대 수. 
-	//기본적으로 str의 모든 접미사는 str의 부분집합이므로 기본값으로 1을 가진다.
-	vector<int> lengthCount(n + 1, 1); // 현재까지 같아온 길이가 i인 중복 문자열의 수
+	vector<int> suffix = getSuffixArray(str); // suffix = str의 사전순으로 정렬된 접미사 배열
+	vector<int> length(n+1, 1); //길이가 i인 부분집합들 중 가장 자주 등장하는 부분집합의 수. 
+	//기본적으로 str의 모든 접미사는 str의 부분집합이므로 length배열의 원소들을 1로 초기화한다. (최소 길이가 i인 부분집합이 하나는 존재한다)
+	vector<int> lengthCount(n + 1, 1); // 현재까지 같아온 길이가 i인 부분 문자열의 수
 
-	int maxSameCount = 0; // 현재까지 같아온 중복 문자열의 최대 길이
-	for (int i = 1; i < suffix.size(); i++) {
+	int maxSameCount = 0; // 현재까지 같아온 부분 문자열의 최대 길이
+	for (int i = 1; i < suffix.size(); i++) { // str의 모든 접미사에 대해 순회
 		int curSuffix = suffix[i], prevSuffix = suffix[i - 1];
-		int sameCount = 0; // 중복 문자열의 길이
+		int sameCount = 0; // 부분 문자열의 길이
 		while (curSuffix < n && prevSuffix < n) {
 			if (str[curSuffix] == str[prevSuffix]) {
 				lengthCount[++sameCount]++;
 				curSuffix++; prevSuffix++;
 				maxSameCount = max(maxSameCount, sameCount);
+				//비교하는 두 개의 접미사들 중 하나의 접미사가 다른 접미사의 접두사일 때,(ex - ana, anana)
+				//else문을 거치지 않고 while문을 빠져나가기 때문에 maxSameCount에 현재까지 같아온 부분 문자열의 최대 길이를
+				//저장해놓지 않는다면 다음 순회에서 length배열을 갱신할 때 갱신해야 할 원소들 중 일부를 빼먹을 수 있다.
 			}
 			else {
-				for (int i = sameCount + 1; i <= maxSameCount; i++)
-					length[i] = max(length[i], lengthCount[i]);
+				for (int i = sameCount + 1; i <= maxSameCount; i++) //현재 순회에서도 같았던 부분집합에 대해서는 length배열을 갱신하지 않는다.
+					length[i] = max(length[i], lengthCount[i]); // 이전에 구한 부분집합의 수가 더 클 수도 있으므로 max연산을 한다.
 				for (int i = sameCount + 1; i <= maxSameCount; i++)
 					lengthCount[i] = 1;
 				maxSameCount = sameCount;
@@ -94,15 +100,17 @@ int	longestPartialArray(const string& str) {
 			}
 		}
 	}
-
+	
+	//else문을 순회하지 않으므로써 갱신되지 못한 length배열을 완전히 갱신
 	for (int i = 1; i <= n; i++)
 		length[i] = max(length[i], lengthCount[i]);
 
+	//K번 이상 등장하는 부분 문자열의 최대 길이 반환
 	for (int i = n; i > 0; i--) {
 		if (length[i] >= K)
 			return i;
 	}
-
+	//K번 이상 등장하는 부분 문자열이 없을 경우 0 반환
 	return 0;
 }
 
