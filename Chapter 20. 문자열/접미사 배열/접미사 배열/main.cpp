@@ -36,7 +36,7 @@ vector<int> getSuffixArrayNaive(const string& s) {
 struct Comparator {
 	const vector<int>& group;
 	int t;
-	Comparator(const vector<int> _group, int _t) : group(_group), t(_t) {}
+	Comparator(const vector<int>& _group, int _t) : group(_group), t(_t) {}
 	bool operator() (int a, int b) {
 		//첫 t글자가 다르면 이들을 이용해 비교한다.
 		if (group[a] != group[b]) return group[a] < group[b];

@@ -1,7 +1,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
-
+#include <iostream>
 using namespace std;
 
 //첫 t글자로 묶인 그룹 정보를 이용해 첫 2t글자를 비교하는 비교자의 구현
@@ -12,7 +12,7 @@ using namespace std;
 struct Comparator {
 	const vector<int>& group;
 	int t;
-	Comparator(const vector<int> _group, int _t) : group(_group), t(_t) {}
+	Comparator(const vector<int>& _group, int _t) : group(_group), t(_t) {}
 	bool operator() (int a, int b) {
 		//첫 t글자가 다르면 이들을 이용해 비교한다.
 		if (group[a] != group[b]) return group[a] < group[b];
@@ -76,4 +76,10 @@ string minShift(const string& s) {
 			return s2.substr(a[i], s.size());
 	//여기로 올 일은 없어야 한다.
 	return "__oops__";
+}
+
+int main(void) {
+	string inputStr;
+	cin >> inputStr;
+	cout << minShift(inputStr) << endl;
 }

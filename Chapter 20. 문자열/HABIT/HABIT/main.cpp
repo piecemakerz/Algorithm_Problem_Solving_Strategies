@@ -1,8 +1,11 @@
+#include <iostream>
 #include <string>
 #include <vector>
 #include <algorithm>
-#include <iostream>
+#include <cstring>
 using namespace std;
+
+int C, K;
 
 //첫 t글자로 묶인 그룹 정보를 이용해 첫 2t글자를 비교하는 비교자의 구현
 
@@ -54,7 +57,6 @@ vector<int> getSuffixArray(const string& s) {
 		newGroup[perm[0]] = 0; // 첫 2t글자 기준으로 사전순으로 정렬했을 때 가장 앞에 오는 접미사의
 							   //그룹 번호를 0으로 설정한다. 이후 첫 2t글자가 같다면 같은 그룹번호로, 다르다면 그룹 번호를
 							   //1만큼 더 올린다.
-
 		for (int i = 1; i < n; i++)
 			if (compareUsing2T(perm[i - 1], perm[i]))
 				newGroup[perm[i]] = newGroup[perm[i - 1]] + 1;
@@ -65,33 +67,51 @@ vector<int> getSuffixArray(const string& s) {
 	return perm;
 }
 
-//접미사 배열을 이용해 다른 부분 문자열의 수를 세는 알고리즘
+int	longestPartialArray(const string& str) {
+	int n = str.length();
+	vector<int> suffix = getSuffixArray(str);
+	vector<int> length(n+1, 1); //길이가 i인 부분집합의 최대 수. 
+	//기본적으로 str의 모든 접미사는 str의 부분집합이므로 기본값으로 1을 가진다.
+	vector<int> lengthCount(n + 1, 1); // 현재까지 같아온 길이가 i인 중복 문자열의 수
 
-//s[i...]와 s[j...]의 공통 접두사의 최대 길이를 계산한다.
-int commonPrefix(const string& s, int i, int j) {
-	int k = 0;
-	while (i < s.size() && j < s.size() && s[i] == s[j]) {
-		i++; j++; k++;
+	int maxSameCount = 0; // 현재까지 같아온 중복 문자열의 최대 길이
+	for (int i = 1; i < suffix.size(); i++) {
+		int curSuffix = suffix[i], prevSuffix = suffix[i - 1];
+		int sameCount = 0; // 중복 문자열의 길이
+		while (curSuffix < n && prevSuffix < n) {
+			if (str[curSuffix] == str[prevSuffix]) {
+				lengthCount[++sameCount]++;
+				curSuffix++; prevSuffix++;
+				maxSameCount = max(maxSameCount, sameCount);
+			}
+			else {
+				for (int i = sameCount + 1; i <= maxSameCount; i++)
+					length[i] = max(length[i], lengthCount[i]);
+				for (int i = sameCount + 1; i <= maxSameCount; i++)
+					lengthCount[i] = 1;
+				maxSameCount = sameCount;
+				break;
+			}
+		}
 	}
-	return k;
-}
-//s의 서로 다른 부분 문자열의 수를 센다.
-int countSubstrings(const string& s) {
-	vector<int> a = getSuffixArray(s);
-	int ret = 0;
-	int n = s.size();
-	for (int i = 0; i < a.size(); i++) {
-		int cp = 0;
-		if (i > 0) cp = commonPrefix(s, a[i - 1], a[i]);
-		//a[i]의 (n-a[i])개의 접두사들 중에서 cp개는 중복이다.
-		ret += s.size() - a[i] - cp;
+
+	for (int i = 1; i <= n; i++)
+		length[i] = max(length[i], lengthCount[i]);
+
+	for (int i = n; i > 0; i--) {
+		if (length[i] >= K)
+			return i;
 	}
-	return ret;
+
+	return 0;
 }
 
 int main(void) {
-	string inputStr;
-	cin >> inputStr;
-	cout << countSubstrings(inputStr) << endl;
-	return 0;
+	cin >> C;
+	for (int testCase = 0; testCase < C; testCase++) {
+		cin >> K;
+		string inputStr;
+		cin >> inputStr;
+		cout << longestPartialArray(inputStr) << endl;
+	}
 }
