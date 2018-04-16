@@ -67,9 +67,10 @@ vector<int> getSuffixArray(const string& s) {
 	return perm;
 }
 
+//내 풀이
 //한 부분 문자열이 두번 이상 출현할 경우 이를 접두사를 갖는 접미사들은 항상 인접해 있다.
 //따라서 인접한 접미사들의 접두사가 동일하다면 이는 중복 출현하는 부분 문자열이다.
-
+//책의 답은 내 답보다 훨씬 간단하게 해결했다.
 int	longestPartialArray(const string& str) {
 	int n = str.length();
 	vector<int> suffix = getSuffixArray(str); // suffix = str의 사전순으로 정렬된 접미사 배열
@@ -112,6 +113,28 @@ int	longestPartialArray(const string& str) {
 	}
 	//K번 이상 등장하는 부분 문자열이 없을 경우 0 반환
 	return 0;
+}
+
+//책의 풀이
+//접미사 배열을 이용해 말버릇 문제를 해결하는 알고리즘
+
+//s[i..]와 s[j..]의 공통 접두사의 최대 길이를 계산한다.
+int commonPrefix(const string& s, int i, int j) {
+	int k = 0;
+	while (i < s.size() && j < s.size() && s[i] == s[j]) {
+		i++; j++; k++;
+	}
+	return k;
+}
+
+//k번 이상 출현하는 s의 부분 문자열 중 최대 길이를 찾는다.
+int longestFrequent(int k, const string& s) {
+	vector<int> a = getSuffixArray(s);
+	int ret = 0;
+	for (int i = 0; i + k <= s.size(); i++) {
+		ret = max(ret, commonPrefix(s, a[i], a[i + k - 1]));
+	}
+	return ret;
 }
 
 int main(void) {
