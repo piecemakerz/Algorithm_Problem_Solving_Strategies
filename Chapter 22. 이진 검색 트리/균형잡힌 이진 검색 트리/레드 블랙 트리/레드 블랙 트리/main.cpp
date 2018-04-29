@@ -1,15 +1,18 @@
 //레드 블랙 트리는 이진 검색 트리로서 각 노드당 한 비트의 추가 기억 공간을 가진다.
-//이 비트는 노드의 색깔을 나타내는데, 적색이나 흑색이 될 수 있다.
+//이 비트는 노드의 색깔을 나타내는데, 레드이거나 블랙이 될 수 있다.
 //레드 블랙 트리는 루트에서 리프까지의 경로에 나타나는 노드의 색깔을 제한함으로써
-//경로 중 어떠한 것도 다른 경로보다 두 배 이상 길지 않음을 보장하게 되는데,
-//이로써 트리가 근사적으로 균형을 이룬 트리가 된다.
+//루트 노드로부터 가장 먼 경로까지의 거리가, 가장 가까운 경로까지의 거리의 두 배 보다 항상 작다.
+//이는 최단 경로가 모두 블랙 노드로만 구성되어 있을 때, 최장 경로는 블랙 노드와 레드 노드가 
+//번갈아 나오는 것이 될 것이기 때문이다. 모든 경로에서 블랙 노드의 수가 같으므로 존재하는 모든
+//경로에 대해 최장 경로의 거리는 최단 경로의 거리의 두배 이상이 될 수 없다. 
+//즉, 레드-블랙 트리는 개략적으로 균형잡혀 있다.
 
 //레드 블랙 트리의 특성
-//1. 모든 노드는 적색이거나 흑색이다.
-//2. 루트는 흑색이다.
-//3. 모든 리프(nil)는 흑색이다.
-//4. 노드가 적색이면 그 노드의 자식은 모두 흑색이다. (흑색노드는 연속으로 나올 수 있다.)
-//5. 각 노드로부터 그 노드의 자손인 리프로 가는 경로들은 모두 같은 수의 흑색 노드를 포함한다.
+//1. 모든 노드는 레드 혹은 블랙이다.
+//2. 루트 노드는 블랙이다.
+//3. 모든 리프(nil)는 블랙이다.
+//4. 레드 노드의 양쪽 자식노드는 언제나 블랙이다. (블랙노드는 연속으로 나올 수 있다.)
+//5. 각 노드로부터 리프노드에 도달하는 모든 경로들은 리프 노드를 제외하면 모두 같은 수의 흑색 노드를 포함한다.
 
 #include <iostream>
 #include <vector>
@@ -25,19 +28,24 @@ typedef struct Node
 	Node *left, *right, *parent;
 	Node(int data) : data(data)	{
 		left = right = parent = NULL;
-	}
+	};
 }Node;
 
 typedef struct Tree {
 	Node * root;
 	Node * nil; // 경계 노드. 모든 리프 노드는 이 노드를 가리키게 된다(& 루트의 부모).
-	Tree(Node * root) : root(root) {
+	Tree() {
 		nil = new Node(-1);
 		nil->color = BLACK;
+		root = nil;
 	}
 }Tree;
 
 Tree * T;
+
+bool isLeaf(Node * node) {
+	return (node->left == T->nil && node->right == T->nil);
+}
 
 //최솟값 노드 반환
 Node* findMinNode(Node * Tree) {
@@ -53,22 +61,54 @@ Node* findMaxNode(Node * Tree) {
 	return Tree;
 }
 
-//x->right != T.nil임을 가정한다.
-//x를 왼쪽으로 돌려 새로운 루트 노드가 된 y를 반환한다.
-Node * leftRotate(Node * x) {
-	Node * y = x->right;
-	x->right = y->left;
-	if (y->left != T->nil)
-		y->left->parent = x;
-	if (x->parent == T->nil)
-		T->root = y;
-	else if (x == x->parent->left)
-		x->parent->left = y;
+void makeNewRoot(Node * node) {
+	node->parent = T->nil;
+	T->root = node;
+	node->color = BLACK;
+}
+
+//node->right != T.nil임을 가정한다.
+//node를 왼쪽으로 돌려 새로운 루트 노드가 된 rightChild를 반환한다.
+Node * leftRotate(Node * node) {
+	Node * rightNode = node->right;
+	node->right = rightNode->left;
+
+	if (rightNode->left != T->nil)
+		rightNode->left->parent = node;
+
+	if (node->parent == T->nil)
+		makeNewRoot(rightNode);
+	else if (node == node->parent->right)
+		node->parent->right = rightNode;
 	else
-		x->parent->right = y;
-	y->left = x;
-	x->parent = y;
-	return y;
+		node->parent->left = rightNode;
+
+	rightNode->left = node;
+	rightNode->parent = node->parent;
+	node->parent = rightNode;
+	return rightNode;
+}
+
+//node->left != T.nil임을 가정한다.
+//node를 오른쪽으로 돌려 새로운 루트 노드가 된 leftNode를 반환한다.
+Node * rightRotate(Node * node) {
+	Node * leftNode = node->left;
+	node->left = leftNode->right;
+
+	if(leftNode->right != T->nil)
+		leftNode->right->parent = node;
+
+	if (node->parent == T->nil)
+		makeNewRoot(leftNode);
+	else if (node == node->parent->left)
+		node->parent->left = leftNode;
+	else
+		node->parent->right = leftNode;
+
+	leftNode->right = node;
+	leftNode->parent = node->parent;
+	node->parent = leftNode;
+	return leftNode;
 }
 
 //노드의 검색
@@ -81,90 +121,78 @@ Node* searchNode(Node * node, int data) {
 	else return searchNode(node->right, data);
 }
 
-//x->left != T.nil임을 가정한다.
-//x를 오른쪽으로 돌려 새로운 루트 노드가 된 y를 반환한다.
-Node * rightRotate(Node * x) {
-	Node * y = x->left;
-	x->left = y->right;
-	if (y->right != T->nil)
-		y->right->parent = x;
-	if (x->parent == T->nil)
-		T->root = y;
-	else if (x == x->parent->left)
-		x->parent->left = y;
+Node * grandparent(Node * n)
+{
+	if ((n != T->nil) && (n->parent != T->nil))
+		return n->parent->parent;
 	else
-		x->parent->right = y;
-	y->right = x;
-	x->parent = y;
-	return y;
+		return T->nil;
 }
 
+Node * uncle(Node * n)
+{
+	Node * g = grandparent(n);
+	if (g == T->nil)
+		return T->nil; // No grandparent means no uncle
+	if (n->parent == g->left)
+		return g->right;
+	else
+		return g->left;
+}
 
 void insertFixup(Node * node) {
-	//새로 삽입하는 노드의 색은 적색이다.
-	//따라서 node의 부모 노드 색이 적색이라면 레드 블랙 트리의 조건을 위반하므로
+	//새로 삽입하는 노드의 색은 레드이다.
+	//따라서 node의 부모 노드 색이 레드라면 레드 블랙 트리의 조건을 위반하므로
 	//트리의 재조정을 while문에서 수행하며,
-	//while문에 진입한다면 node의 조부모는 무조건 존재하며 흑색이다.
+	//처음 while문에 진입한다면 node의 조부모는 무조건 존재하며 블랙이다.
 
 	while (node->parent->color == RED) {
-		Node * sibling; // 친척
-		Node * grandParent = node->parent->parent; // 조부모
-
-		//node의 부모가 조부모의 왼쪽 자식이라면
-		if (node->parent == grandParent->left) {
-			sibling = grandParent->right;
-			//node의 부모와 node의 친척도 모두 적색이라면 node의 부모와 친척의 색을 모두 흑색으로 바꾼 후
-			//node를 node의 조부모의 위치로 이동시킨다.
-			//이후 레드 블랙 트리의 조건을 만족하지 않을 가능성을 가진 노드는
-			//node의 조부모이므로 node가 조부모를 가리키도록 한 후 트리 재조정을 재개한다.
-			if (sibling->color == RED) {
-				node->parent->color = BLACK;
-				sibling->color = BLACK;
-				grandParent->color = RED;
-				node = grandParent;
-			}
-			//node의 친척이 흑색이라면, 즉 node의 조부모와 친척이 모두 흑색이고 node와 부모가 모두 적색인 경우
-			//회전을 통해 레드 블랙 트리의 특성을 만족시키도록 재조정한다.
-			//이 else문의 경우 한 번 수행 시 특성을 모두 만족시키므로
-			//다음 while문은 더 이상 수행되지 않는다.
-			else {
-				//node가 오른쪽 자식인 경우 node를 왼쪽 자식으로 바꾸기 위해
-				//node의 부모를 기준으로 leftRotate를 호출한다.
-				if (node == node->parent->right) {
-					node = node->parent;
-					leftRotate(node);
-				}
-				//node가 왼쪽 자식인 경우 부모와 조부모의 색을 바꾼 후
-				//조부모를 기준으로 오른쪽 회전한다.
-				node->parent->color = BLACK;
-				grandParent->color = RED;
-				rightRotate(grandParent);
-			}
+		Node * parent = node->parent;
+		Node * grandParent = grandparent(node);// 조부모
+		Node * sibling = uncle(node); // 친척
+		bool isRightChild = (node == parent->right);
+		//parent와 sibling이 모두 레드라면 특성 5를 유지하기 위해
+		//parent와 sibling의 색을 모두 블랙으로 바꾼 후 grandParent의 색을 레드로 바꾼다.
+		//이로써 node는 블랙 부모 노드를 가지게 된다.
+		//이후 레드 블랙 트리의 조건(특성 2나 특성 4)을 만족하지 않을 가능성을 가진 노드는
+		//grandParent이므로 node가 grandParent를 가리키도록 한 후 트리 재조정을 재개한다.
+		if (sibling != T->nil && sibling->color == RED) {
+			parent->color = BLACK;
+			sibling->color = BLACK;
+			grandParent->color = RED;
+			node = grandParent;
 		}
-
-		//node의 부모가 조부모의 오른쪽 자식이라면
-		//node의 부모가 조부모의 왼쪽 자식일 때의 코드에서
-		//right와 left를 바꾼 경우와 같다.
+		//sibling이 블랙이라면, 즉 parent가 레드이고 sibling과 grandParent가 모두 블랙일 경우
+		//회전을 통해 레드 블랙 트리의 특성을 만족시키도록 재조정한다.
+		//이 else문의 경우 한 번 수행 시 트리가 레드 블랙 트리의 특성을 모두 만족하게 되므로
+		//다음 while문은 더 이상 수행되지 않는다.
 		else {
-			sibling = grandParent->left;
-			if (sibling->color == RED) {
-				node->parent->color = BLACK;
-				sibling->color = BLACK;
-				grandParent->color = RED;
-				node = grandParent;
+			//node와 parent가 트리상에서 일렬이 아닐 경우 node를 기준으로 회전하여 node와 parent를 일렬로 배치한다.
+			//이는 다음 과정에서 회전 이후에 parent의 양쪽 자식이 node와 grandParent가 되도록 하기 위함이다.
+			if (node->parent == grandParent->right && !isRightChild) {
+				parent = rightRotate(node);
+				node = node->right;
+				grandParent = grandparent(node);
+				isRightChild = (node == parent->right);
 			}
-			else {
-				if (node == node->parent->left) {
-					node = node->parent;
-					rightRotate(node);
-				}
-				node->parent->color = BLACK;
-				grandParent->color = RED;
+			else if (node->parent == grandParent->left && isRightChild) {
+				parent = leftRotate(node);
+				node = node->left;
+				grandParent = grandparent(node);
+				isRightChild = (node == parent->right);
+			}
+			//parent가 grandParent의 자리에 위치하도록 grandParent를 기준으로 회전한다.
+			//grandParent가 이전에 블랙이었고, parent는 레드였기 때문에 두 노드의 색을 바꾸면 
+			//grandParent의 자리에 위치한 parent가 블랙노드이고 parent의 양쪽 자식인 grandParent와
+			//sibling이 레드 노드가 되기 때문에 레드 블랙 트리의 특성 4를 만족하게 된다.
+			parent->color = BLACK;
+			grandParent->color = RED;
+			if (isRightChild)
 				leftRotate(grandParent);
-			}
+			else
+				rightRotate(grandParent);
 		}
 	}
-
 	T->root->color = BLACK;
 }
 
@@ -173,6 +201,11 @@ void insertFixup(Node * node) {
 //이진 검색 트리에서의 삽입과 유사하다.
 void insert(int data) {
 	Node * newNode = new Node(data);
+	newNode->left = T->nil;
+	newNode->right = T->nil;
+	newNode->parent = T->nil;
+	newNode->color = RED;
+
 	Node * prevNode = T->nil;
 	Node * curNode = T->root;
 	while (curNode != T->nil) {
@@ -184,139 +217,222 @@ void insert(int data) {
 	}
 	newNode->parent = prevNode;
 
-	if (prevNode == T->nil) // 트리가 비어있을 경우
-		T->root = newNode;
-
+	if (prevNode == T->nil) { // 트리가 비어있을 경우 newNode가 트리의 루트가 된다.
+		makeNewRoot(newNode);
+		return;
+	}
 	else if (data < prevNode->data)
 		prevNode->left = newNode;
-
 	else
 		prevNode->right = newNode;
 
-	newNode->left = T->nil;
-	newNode->right = T->nil;
-	newNode->color = RED;
 	insertFixup(newNode);
 }
 
-//한 서브 트리를 다른 서브 트리로 교체하는 서브 루틴. 
-//노드 u가 루트인 서브 트리를 노드 v가 루트인 서브 트리로 교체한다.
-//노드 u의 부모노드의 서브트리 포인터와 노드 v의 부모노드만 갱신해주며,
-//노드 u에 대한 메모리 언로드, 노드 v의 left, right 포인터 갱신은
-//rbTransplant()의 호출자의 몫이다.
-void rbTransplant(Node * u, Node * v) {
-	if (u->parent == T->nil)
-		T->root = v;
-	else if (u == u->parent->left)
-		u->parent->left = v;
-	else
-		u->parent->right = v;
-	v->parent = u->parent;
+Node * findSuccessor(Node * node) {
+	if (node->right == T->nil)
+		return node;
+	Node * successor = node->right;
+	while (successor->left != T->nil)
+		successor = successor->left;
+	return successor;
 }
 
+Node * findPredecessor(Node * node) {
+	if (node->left == T->nil)
+		return node;
+	Node * predecessor = node->left;
+	while (predecessor->right != T->nil)
+		predecessor = predecessor->right;
+	return predecessor;
+}
+//노드 n1을 노드 n2로 대체한다.
+void replaceNode(Node * n1, Node * n2) {
+	cout << "replacing Node with" << n1->data<<" and "<<n2->data<<endl;
+	if (n2 == T->nil) {
+		if (n1 == n1->parent->left)
+			n1->parent->left = T->nil;
+		else
+			n1->parent->right = T->nil;
+	}
+	else {
+		if (n1->parent == T->nil)
+			makeNewRoot(n2);
+		else if (n1 == n1->parent->left)
+			n1->parent->left = n2;
+		else n1->parent->right = n2;
+	}
+	int ret = n1->data;
+	n1->data = n2->data;
+	n2->data = ret;
+	n2->parent = n1->parent;
+	n1->parent = n2;
+}
+
+//재귀 시 node는 블랙노드임이 보장된다.
 void deleteFixup(Node * node) {
-	while (node != T->root && node->color == BLACK) {
-		//sibling = node의 친척
-		Node * sibling;
-		//node가 왼쪽 자식일 경우
-		if (node == node->parent->left) {
-			sibling = node->parent->right;
-			//경우 1. sibling이 적색인 경우 
-			//레드 블랙 트리의 특성을 위반하지 않고sibling을 흑색 노드로 만들기 위해 
-			//sibling과 node의 부모 노드 색을 바꾼 후 부모 노드를 기준으로 트리를 왼쪽으로 회전시킨다.
-			//부모 노드의 새로운 오른쪽 자식은 새로운 sibling이 되며, sibling이 흑색 노드가 되었으므로
-			//경우 1은 발생하지 않는다.
-			if (sibling->color == RED) {
-				sibling->color = BLACK;
-				node->parent->color = RED;
-				leftRotate(node->parent);
-				sibling = node->parent->right;
-			}
-			//경우 2. sibling이 흑색이고 sibling의 두 자식이 모두 흑색인 경우
-			if (sibling->left->color = BLACK && sibling->right->color == BLACK) {
-				sibling->color = RED;
-				node = node->parent;
+	//node가 새로운 루트노드라면 모든 경로에서 하나의 블랙노드(delNode)를 삭제했고
+	//새로운 루트노드가 블랙노드이므로 트리의 모든 특성이 보존된다. 
+
+	while (node->parent != T->nil) {
+		cout << "checking node" << node->data << endl;
+		Node * parent = node->parent;
+		Node * sibling = (node == parent->left) ? parent->right : parent->left;
+		bool isRightChild = (node == parent->right);
+
+		//sibling과 node, parent가 모두 블랙노드일 경우
+		//간단히 sibling을 레드노드로 바꾸면 된다. 이로 인해 parent를 루트로 하는 트리의
+		//블랙노드 갯수 불균형은 해결되었으나, parent를 지나지 않는 모든
+		//경로는 parent를 지나는 모든 경로에 대해 검은 노드를 한 개 더 가지게 되므로
+		//트리가 특성 5를 위반하게 된다. 따라서 parent에 대해 재조정을 다시 시작한다.
+		if (parent->color == BLACK && sibling->color == BLACK) {
+			sibling->color = RED;
+			node = parent;
+			continue;
+		}
+		//sibling이 레드노드, 즉 node, parent가 블랙노드이고 sibling이 레드노드일 경우
+		//(sibling이 레드일 경우 레드노드는 연속해서 나올 수 없기 때문에 parent는 무조건 블랙임이 보장된다.
+		//또한 node의 위치에 있던 블랙노드를 삭제하여 불균형이 발생했으므로 sibling의 자식 노드들이 블랙 노드임은
+		//물론이고 자식 노드들의 자식 노드들도 경로 중 블랙노드를 반드시 하나 이상 포함할 것이다.)
+		//node가 블랙 형제노드와 레드 부모노드를 가지게 하기 위해 parent를 기준으로 회전하고 parent의 색을 레드로,
+		//sibling의 색을 BLACK으로 바꾼다. 이는 트리 재조정의 다음 과정의 조건
+		//(sibling->color == BLACK && parent->color == RED)을 만족시키기 위함이다.
+		else {
+			parent->color = RED;
+			sibling->color = BLACK;
+			if (isRightChild) {
+				rightRotate(parent);
+				sibling = parent->left;
 			}
 			else {
-				//경우 3. sibling은 흑색, sibling의 왼쪽 자식은 적색, 오른쪽 자식은 흑색인 경우
-				//sibling과 왼쪽 자식의 색을 바꾼 후 sibling을 기준으로 트리를 오른쪽으로 회전시키면
-				//새로운 sibling은 적색인 오른쪽 자식을 가지는 흑색 노드가 되므로 경우 4를 만족하게 된다.
-				if (sibling->right->color == BLACK) {
-					sibling->left->color = BLACK;
-					sibling->color = RED;
-					rightRotate(sibling);
-					sibling = node->parent->right;
-				}
-				//경우 4. sibling은 흑색이고 sibling의 오른쪽 자식은 적색인 경우
-				//노드의 색깔을 바꾸고 node의 부모 노드를 기준으로 트리를 좌회전시키면
-				//전체 트리의 특성을 만족시킬 수 있으므로 while 루프를 종료시키기 위해
-				//node를 트리의 루트 노드로 변경한다.
-				sibling->color = node->parent->color;
-				node->parent->color = BLACK;
-				sibling->right->color = BLACK;
-				leftRotate(node->parent);
-				node = T->root;
+				leftRotate(parent);
+				sibling = parent->right;
 			}
 		}
 
-		//node가 오른쪽 자식일 경우
-		else {
-
+		//sibling과 sibling의 자식들은 모두 블랙이지만, parent는 레드노드인 경우
+		//단순히 sibling과 parent의 색을 바꿔주면 된다.
+		//이는 node를 지나는 경로에 대해 블랙 노드의 갯수를 1개 증가시켜, 삭제된
+		//블랙노드(직후노드)의 갯수를 보충해준다. 이후 레드블랙 트리가 모든 특성을 만족하므로
+		//반복을 중단한다.
+		if (sibling->color == BLACK && sibling->right->color == BLACK && 
+			sibling->left->color == BLACK && parent->color == RED) {
+			sibling->color = RED;
+			parent->color = BLACK;
+			break;
 		}
+		
+		//sibling은 이전에 조정했으므로 반드시 블랙노드이다.
+		//sibling과 일렬로 있는 sibling의 자식노드가 블랙이며 다른 자식노드가 레드일 때
+		//다음 과정의 조건을 만족시키기 위해 레드 노드를 parent의 오른쪽 자식의 오른쪽 자식이나,
+		//parent의 왼쪽 자식의 왼쪽 자식으로 두기 위해 sibling을 기준으로 회전한다.
+		//회전 후에도 node의 새로운 sibling은 무조건 블랙노드이다.
+		if (!isRightChild && sibling->right->color == BLACK && sibling->left->color == RED) {
+			sibling->left->color = BLACK;
+			sibling->color = RED;
+			sibling = rightRotate(sibling);
+		}
+		else if (isRightChild && sibling->left->color == BLACK && sibling->right->color == RED) {
+			sibling->right->color = BLACK;
+			sibling->color = RED;
+			sibling = leftRotate(sibling);
+		}
+
+		//sibling이 블랙이고, parent의 왼쪽 노드의 왼쪽 노드나 오른쪽 노드의 오른쪽 노드가 레드노드일 경우
+		//parent를 기준으로 회전하여 sibling이 parent와 레드 노드의 부모노드가 되도록 한다.
+		//그 후 parent와 sibling의 색을	바꾸고 레드 노드를 블랙 노드로 바꾸면 된다.
+		//이 과정이 끝나면 parent의 자리를 대신한 sibling을 루트로 하는 트리는 모든 경로에서
+		//같은 블랙노드의 수를 가지게 된다.
+		if (!isRightChild) {
+			sibling->right->color = BLACK;
+			sibling->color = parent->color;
+			parent->color = BLACK;
+			leftRotate(parent);
+		}
+		else {
+			sibling->left->color = BLACK;
+			sibling->color = parent->color;
+			parent->color = BLACK;
+			rightRotate(parent);
+		}
+		break;
 	}
 	node->color = BLACK;
 }
 
-Node * removeNode(int data) {
+Node * deleteNode(int data) {
 	Node * delNode = searchNode(T->root, data);
 	if (delNode == T->nil)
 		return T->nil;
 
-	//replaceNode는 delNode가 하나 이하의 자식을 가질 때에는 delNode를 가리키며,
-	//두 개의 자식을 가질 경우 delNode의 직후원소를 가리킨다.
-	Node * replaceNode = delNode;
-	int repnodeColor = replaceNode->color;
-	//origReplaceNode = replaceNode의 트리 상에서의 이전 위치를 가리키는 노드
-	Node * origReplaceNode;
+	cout << "delete Node" << delNode->data<<endl;
+	//삭제할 노드를 대체할 직후노드를 찾는다.
+	//직후노드가 존재하지 않는 경우 대체하지 않고 삭제할 노드를 그대로 삭제하면 된다.
+	Node * predecessor = findPredecessor(delNode);
+	delNode->data = predecessor->data;
+	delNode = predecessor;
 
-	//삭제할 노드가 오른쪽 자식만 가지고 있다면
-	if (delNode->left == T->nil) {
-		origReplaceNode = delNode->right;
-		rbTransplant(delNode, delNode->right);
-	}
-	//삭제할 노드가 왼쪽 자식만 가지고 있다면
-	else if (delNode->right == T->nil) {
-		origReplaceNode = delNode->left;
-		rbTransplant(delNode, delNode->left);
-	}
-	//삭제할 노드가 두 개의 자식을 모두 가질 때
-	else {
-		//replaceNode = delNode의 직후노드
-		replaceNode = findMinNode(delNode->right);
-		repnodeColor = replaceNode->color;
-		origReplaceNode = replaceNode->right;
-		if (replaceNode->parent == delNode)
-			origReplaceNode->parent = replaceNode;
-		else {
-			rbTransplant(replaceNode, replaceNode->right);
-			replaceNode->right = delNode->right;
-			replaceNode->right->parent = replaceNode;
-		}
-		rbTransplant(delNode, replaceNode);
-		replaceNode->left = delNode->left;
-		replaceNode->left->parent = replaceNode;
-		replaceNode->color = delNode->color;
-	}
-	//replaceNode가 흑색이면 하나 이상의 레드 블랙 트리 특성이 위반될 수 있는데,
-	//이를 deleteFixup()에서 복구한다.
-	//replaceNode가 흑색이라면 다음 세 가지 문제가 발생할 수 있다.
-	//1. replaceNode가 루트 노드이고 y의 적색 자식 노드가 새로운 루트가 된다면 특성 2를 위반한다.
-	//2. rbTransplant()가 노드의 색까지 바꿔주지 않으므로, origReplaceNode가 적색이고 origReplaceNode의 부모가
-	//적색 노드라면 특성 4를 위반한다.
-	//3. replaceNode를 이동함으로써 replaceNode를 원래 포함하고 있던 경로에서는 흑색 노드가 하나 줄게 된다.
-	//따라서 replaceNode의 원래 위치를 기준으로 레드 블랙 트리를 재조정해준다.
-	if (repnodeColor == BLACK)
-		deleteFixup(origReplaceNode);
+	cout << "predecessor found" << predecessor->data<<endl;
+	//직후노드가 존재하지 않는 경우의 자식은 반드시 왼쪽 자식노드일 것이며,
+	//직후노드가 존재할 경우 직후노드의 자식은 반드시 오른쪽 자식노드일 것이다.
+	Node * child = isLeaf(delNode->right) ? delNode->left : delNode->right;
+	replaceNode(delNode, child);
 
-	return replaceNode;
+	//삭제할 노드가 레드노드일 경우 자식노드는 반드시 블랙노드일 것이므로,
+	//아무런 재조정 없이 노드를 대체하면 된다.
+
+	cout << "rebalancing node" << child->data << endl;
+	if (delNode->color == BLACK) {
+		//삭제할 노드가 블랙노드이고 자식노드가 레드노드일 경우,
+		//자식노드의 색을 블랙으로 바꾸면 레드블랙 트리의 특성을 위반하지 않게 된다.
+		if (child->color == RED)
+			child->color = BLACK;
+		//삭제할 노드가 블랙노드이고 자식노드 또한 블랙노드일 경우
+		//삭제할 노드를 자식노드로 대체했을 때 삭제할 노드를 지나는 경로가
+		//다른 모든 경로에 대해 블랙노드가 1개 부족하게 되므로
+		//트리의 재조정을 위해 deleteFixup()을 호출한다.
+		else
+			deleteFixup(child);
+	}
+	free(delNode);
+	return child;
+}
+
+void printTree(Node * node) {
+	if (node == T->nil) return;
+	if(node->left != T->nil)
+		cout << "left Child ";
+	printTree(node->left);
+	cout << node->data << '('<<node->color<<") ";
+	if(node->right != T->nil)
+		cout << "right Child ";
+	printTree(node->right);
+}
+
+int main(void) {
+	T = new Tree();
+	cout << "insert Data" << endl;
+	int data;
+	while (true) {
+		cin >> data;
+		if (data == -1)
+			break;
+		insert(data);
+		printTree(T->root);
+		cout << "root: " << T->root->data;
+		cout << endl;
+	}
+	cout << "delete Data" << endl;
+	while (true) {
+		if (T->root == NULL)
+			break;
+		cin >> data;
+		if (data == -1)
+			break;
+		deleteNode(data);
+		printTree(T->root);
+		cout << "root: " << T->root->data;
+		cout << endl;
+	}
+	return 0;
 }
