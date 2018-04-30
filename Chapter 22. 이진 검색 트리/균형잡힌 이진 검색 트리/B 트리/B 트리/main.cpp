@@ -145,8 +145,10 @@ public:
 		return true;
 	}
 
-	//data[idx]의 직후노드 리턴. 직후노드는 항상 리프 레벨에 존재하며, data[idx]가
-	//존재하면 idx의 오른쪽 자식은 반드시 존재하므로 직후노드는 반드시 존재한다.
+	//data[idx]의 직후노드 리턴. 직후노드를 찾는 경우는 삭제할 노드가 리프노드가
+	//아닐 경우밖에 없으며, 리프노드가 아닌 B트리의 노드는 각각 데이터에 대한 왼쪽
+	//자식과 오른쪽 자식이 모두 존재한다. 따라서 data[idx]의 직후노드가 존재하지 않는
+	//경우에 대한 예외처리를 하지 않아도 된다.
 	Node* findSuccessor(int idx) {
 		Node * successor = children[idx + 1];
 		while (!successor->isLeaf()) {

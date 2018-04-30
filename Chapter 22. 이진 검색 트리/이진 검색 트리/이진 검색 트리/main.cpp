@@ -11,48 +11,52 @@ using namespace std;
 //removeNodeBook()은 책 Introduction to Alglrithms에서 제시하는 노드 삭제 알고리즘이며,
 //removeNodeOther()과 같은 방법을 이용해 노드 삭제를 구현한다.
 typedef struct Node {
-	int Data;
-	Node * Left;
-	Node * Right;
+	int data;
+	Node * left;
+	Node * right;
 	Node * parent;
-	Node(int data) : Data(data) {
-		Left = NULL, Right = NULL, parent = NULL;
+	Node(int data) : data(data) {
+		left = NULL, right = NULL, parent = NULL;
 	}
 } Node;
 
 //노드의 검색
-Node* searchNode(Node* Tree, int data) {
-	if (Tree == NULL || Tree->Data == data) return Tree;
+Node* searchNode(Node* node, int data) {
+	if (node == NULL || node->data == data) return node;
 
-	if (Tree->Data > data)
-		return searchNode(Tree->Left, data);
+	if (node->data > data)
+		return searchNode(node->left, data);
 
-	else return searchNode(Tree->Right, data);
+	else return searchNode(node->right, data);
 }
 
 //최솟값 노드 반환
 Node* findMinNode(Node * Tree) {
-	while (Tree->Left != NULL)
-		Tree = Tree->Left;
+	while (Tree->left != NULL)
+		Tree = Tree->left;
 	return Tree;
 }
 
 //최댓값 노드 반환
 Node* findMaxNode(Node * Tree) {
-	while (Tree->Right != NULL)
-		Tree = Tree->Right;
+	while (Tree->right != NULL)
+		Tree = Tree->right;
 	return Tree;
 }
 
-//직후노드 리턴
+//직후노드 리턴. 직후노드를 찾는 경우는 삭제할 노드가 두 개의
+//자식을 가질 경우밖에 없으므로 직후노드는 반드시 삭제할 노드의
+//아래 레벨에 존재한다. 따라서 삭제할 노드의 오른쪽 자식이 NULL인
+//경우에 대한 예외처리를 하지 않아도 된다.
 Node* findSuccessor(Node* node) {
-	if (node->Right != NULL)
-		return findMinNode(node->Right);
+	//if (node->right != NULL)
+	return findMinNode(node->right);
 
-	while (node->parent != NULL && node == node->parent->Right) {
+	/*while (node->parent != NULL && node == node->parent->right) {
 		node = node->parent;
 	}
 	return node->parent;
+	*/
 }
 
 //노드의 삽입
@@ -63,18 +67,18 @@ void insertNode(Node*& Tree, int data) {
 
 	while (curNode != NULL) {
 		prevNode = curNode;
-		if (data < curNode->Data)
-			curNode = curNode->Left;
-		else curNode = curNode->Right;
+		if (data < curNode->data)
+			curNode = curNode->left;
+		else curNode = curNode->right;
 	}
 	newNode->parent = prevNode;
 
 	if (prevNode == NULL)
 		Tree = newNode; // Tree는 빈 트리이다.
-	else if (data < prevNode->Data)
-		prevNode->Left = newNode;
+	else if (data < prevNode->data)
+		prevNode->left = newNode;
 	else
-		prevNode->Right = newNode;
+		prevNode->right = newNode;
 }
 
 //두 트리 합치기
@@ -82,15 +86,17 @@ Node* combineTree(Node * LTree, Node * RTree) {
 	Node * newRoot = LTree;
 	if (newRoot == NULL)
 		return RTree;
+	else if (RTree == NULL)
+		return newRoot;
 
-	newRoot->Right = combineTree(newRoot->Right, RTree);
-	if (newRoot->Right != NULL)
-		newRoot->Right->parent = newRoot;
+	newRoot->right = combineTree(newRoot->right, RTree);
+	if (newRoot->right != NULL)
+		newRoot->right->parent = newRoot;
 	return newRoot;
 }
 
 //노드 삭제
-Node* removeNode(Node * Tree, int data) {
+Node* removeNode(Node*& Tree, int data) {
 	Node * delNode = searchNode(Tree, data);
 
 	if (delNode == NULL) {
@@ -98,20 +104,25 @@ Node* removeNode(Node * Tree, int data) {
 		return NULL;
 	}
 	
-	Node * replaceNode = combineTree(delNode->Left, delNode->Right);
+	Node * replaceNode = combineTree(delNode->left, delNode->right);
 	replaceNode->parent = delNode->parent;
 
 	if(delNode->parent != NULL) // delNode가 루트 노드가 아니라면
-		if (delNode->parent->Right == delNode)
-			delNode->parent->Right = replaceNode;
+		if (delNode->parent->right == delNode)
+			delNode->parent->right = replaceNode;
 		else
-			delNode->parent->Left = replaceNode;
-
+			delNode->parent->left = replaceNode;
+	else { // delNode가 루트 노드라면
+		Tree = replaceNode;
+	}
 	delete(delNode);
 	return replaceNode;
 }
 
-Node * removeNodeOther(Node * Tree, int data) {
+//코드가 매우 길다. 아래의 removeOtherNode()나 레드 블랙 트리 구현코드의 deleteNode()는
+//삭제하는 노드를 다른 노드로 대체하는 작업을 별도의 함수로 분리하여
+//코드의 길이를 훨씬 줄였다.
+Node * removeNodeOther(Node*& Tree, int data) {
 	Node * delNode = searchNode(Tree, data);
 	Node * replaceNode = NULL;
 	if (delNode == NULL) {
@@ -120,59 +131,84 @@ Node * removeNodeOther(Node * Tree, int data) {
 	}
 
 	//삭제할 노드가 잎 노드인 경우
-	if (delNode->Right == NULL && delNode->Left == NULL) {
-		if (delNode->parent->Left == delNode)
-			delNode->parent->Left = NULL;
+	if (delNode->right == NULL && delNode->left == NULL) {
+		//삭제할 노드가 트리의 마지막 노드인 경우
+		if (delNode->parent == NULL)
+			Tree = NULL;
+		else if (delNode->parent->left == delNode)
+			delNode->parent->left = NULL;
 		else
-			delNode->parent->Right = NULL;
+			delNode->parent->right = NULL;
 	}
 
 	//삭제할 노드가 하나의 자식을 가질 경우
-	if (delNode->Right == NULL) {
-		replaceNode = delNode->Left;
+	else if (delNode->right == NULL) {
+		replaceNode = delNode->left;
 		replaceNode->parent = delNode->parent;
+		if (replaceNode->parent == NULL)
+			Tree = replaceNode;
+		else if (delNode->parent->right == delNode)
+			delNode->parent->right = replaceNode;
+		else
+			delNode->parent->left = replaceNode;
 	}
-	else if (delNode->Left == NULL) {
-		replaceNode = delNode->Right;
+	else if (delNode->left == NULL) {
+		replaceNode = delNode->right;
 		replaceNode->parent = delNode->parent;
+		if (replaceNode->parent == NULL)
+			Tree = replaceNode;
+		if (delNode->parent->right == delNode)
+			delNode->parent->right = replaceNode;
+		else
+			delNode->parent->left = replaceNode;
 	}
 	//삭제할 노드가 두 개의 자식을 가질 경우
 	//오른쪽 서브 트리에서 가장 작은 값(delNode의 직후노드)으로 대체한다.
 	//직후노드는 왼쪽 자식이 존재하지 않는다.
 	else {
-		Node * replaceNode = findSuccessor(delNode);
-		if (replaceNode->parent->Left = replaceNode)
-			replaceNode->parent->Left = replaceNode->Right;
-		else
-			replaceNode->parent->Right = replaceNode->Right;
+		replaceNode = findSuccessor(delNode);
+		delNode->data = replaceNode->data;
 
-		if (replaceNode->Right != NULL)
-			replaceNode->Right->parent = replaceNode->parent;
+		if (replaceNode->parent->left == replaceNode)
+			replaceNode->parent->left = replaceNode->right;
+		else
+			replaceNode->parent->right = replaceNode->right;
+
+		if (replaceNode->right != NULL)
+			replaceNode->right->parent = replaceNode->parent;
 
 		replaceNode->parent = delNode->parent;
-	}
-
-	if (replaceNode != NULL)
-		if (delNode == delNode->parent->Left)
-			delNode->parent->Left = replaceNode;
+		if (delNode->parent == NULL) {
+			Tree = replaceNode;
+			replaceNode->left = delNode->left;
+			replaceNode->right = delNode->right;
+			if (replaceNode->left != NULL)
+				replaceNode->left->parent = replaceNode;
+			if (replaceNode->right != NULL)
+				replaceNode->right->parent = replaceNode;
+		}
+		else if (delNode->parent->right == delNode)
+			delNode->parent->right = replaceNode;
 		else
-			delNode->parent->Right = replaceNode;
+			delNode->parent->left = replaceNode;
+	}
 	delete(delNode);
 	return replaceNode;
 }
 
 //한 서브 트리를 다른 서브 트리로 교체하는 서브 루틴. 
 //노드 u가 루트인 서브 트리를 노드 v가 루트인 서브 트리로 교체한다.
-//노드 u의 부모노드의 서브트리 포인터와 노드 v의 부모노드만 갱신해주며,
-//노드 u에 대한 메모리 언로드, 노드 v의 left, right 포인터 갱신은
+//u가 전체 트리의 루트노드일 때 루트노드를 v로 바꿔주며,
+//노드 u의 부모노드의 서브트리 포인터와 노드 v의 부모노드를 갱신해준다.
+//교체 후 노드 u에 대한 메모리 언로드, 노드 v의 left, right 포인터 갱신은
 //transplant()의 호출자의 몫이다.
 void transplant(Node*& Tree, Node * u, Node * v) {
 	if (u->parent == NULL)
 		Tree = v;
-	else if (u == u->parent->Left)
-		u->parent->Left = v;
+	else if (u == u->parent->left)
+		u->parent->left = v;
 	else
-		u->parent->Right = v;
+		u->parent->right = v;
 	if (v != NULL)
 		v->parent = u->parent;
 }
@@ -181,26 +217,31 @@ Node * removeNodeBook(Node * Tree, int data) {
 	Node * delNode = searchNode(Tree, data);
 	Node * replaceNode = NULL;
 	//delNode가 오른쪽 자식 노드만 가질 때
-	if (delNode->Left == NULL) {
-		transplant(Tree, delNode, delNode->Right);
-		replaceNode = delNode->Right;
+	if (delNode->left == NULL) {
+		transplant(Tree, delNode, delNode->right);
+		replaceNode = delNode->right;
 	}
 	//delNode가 왼쪽 자식 노드만 가질 때
-	else if (delNode->Right == NULL) {
-		transplant(Tree, delNode, delNode->Left);
-		replaceNode = delNode->Left;
+	else if (delNode->right == NULL) {
+		transplant(Tree, delNode, delNode->left);
+		replaceNode = delNode->left;
 	}
 	//delNode가 왼쪽과 오른쪽 자식 노드를 모두 가질 때
+	//delNode를 delNode의 직후노드로 대체한다.
+	//직후노드는 왼쪽 자식노드를 가지지 않는다.
 	else {
-		replaceNode = findMinNode(delNode->Right);
+		replaceNode = findMinNode(delNode->right);
+		//직후노드가 delNode 바로 오른쪽 자식이라면 대체 시 직후노드의 오른쪽 자식이
+		//바로 delNode 자리의 오른쪽 자식이 되기 때문에 직후노드에 delNode의 오른쪽 자식을
+		//연결하는 과정을 생략해도 된다.
 		if (replaceNode->parent != delNode) {
-			transplant(Tree, replaceNode, replaceNode->Right);
-			replaceNode->Right = delNode->Right;
-			replaceNode->Right->parent = replaceNode;
+			transplant(Tree, replaceNode, replaceNode->right);
+			replaceNode->right = delNode->right;
+			replaceNode->right->parent = replaceNode;
 		}
 		transplant(Tree, delNode, replaceNode);
-		replaceNode->Left = delNode->Left;
-		replaceNode->Left->parent = replaceNode;
+		replaceNode->left = delNode->left;
+		replaceNode->left->parent = replaceNode;
 	}
 	delete(delNode);
 	return replaceNode;
@@ -209,26 +250,32 @@ Node * removeNodeBook(Node * Tree, int data) {
 void printTree(Node* Tree)
 {
 	if (Tree == NULL) return;
-	printTree(Tree->Left);
-	cout << Tree->Data << ' ';
-	printTree(Tree->Right);
+	printTree(Tree->left);
+	cout << Tree->data << ' ';
+	printTree(Tree->right);
 }
 
 int main(void) {
-	int N;
-	cin >> N;
-
 	int data;
-	cin >> data;
-	Node * root = new Node(data);
-	for (int i = 0; i < N-1; i++) {
+	Node * root = NULL;
+
+	while (true) {
 		cin >> data;
+		if (data == -1)
+			break;
 		insertNode(root, data);
+		printTree(root);
+		cout << endl;
 	}
-	printTree(root);
-	cout << endl;
-	removeNodeOther(root, 72);
-	printTree(root);
-	cout << endl;
+	while (true) {
+		cin >> data;
+		if (data == -1)
+			break;
+		removeNodeBook(root, data);
+		if (root == NULL)
+			break;
+		printTree(root);
+		cout << endl;
+	}
 	return 0;
 }
