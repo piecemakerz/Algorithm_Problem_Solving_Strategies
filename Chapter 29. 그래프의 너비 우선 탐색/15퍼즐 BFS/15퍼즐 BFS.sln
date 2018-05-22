@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2000
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "15퍼즐 BFS", "15퍼즐 BFS\15퍼즐 BFS.vcxproj", "{1C4D4F70-90B2-47EE-BE67-9D1869B8FE67}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1C4D4F70-90B2-47EE-BE67-9D1869B8FE67}.Debug|x64.ActiveCfg = Debug|x64
+		{1C4D4F70-90B2-47EE-BE67-9D1869B8FE67}.Debug|x64.Build.0 = Debug|x64
+		{1C4D4F70-90B2-47EE-BE67-9D1869B8FE67}.Debug|x86.ActiveCfg = Debug|Win32
+		{1C4D4F70-90B2-47EE-BE67-9D1869B8FE67}.Debug|x86.Build.0 = Debug|Win32
+		{1C4D4F70-90B2-47EE-BE67-9D1869B8FE67}.Release|x64.ActiveCfg = Release|x64
+		{1C4D4F70-90B2-47EE-BE67-9D1869B8FE67}.Release|x64.Build.0 = Release|x64
+		{1C4D4F70-90B2-47EE-BE67-9D1869B8FE67}.Release|x86.ActiveCfg = Release|Win32
+		{1C4D4F70-90B2-47EE-BE67-9D1869B8FE67}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9A64A6AD-577E-4CAE-9BB9-681738B92306}
+	EndGlobalSection
+EndGlobal
