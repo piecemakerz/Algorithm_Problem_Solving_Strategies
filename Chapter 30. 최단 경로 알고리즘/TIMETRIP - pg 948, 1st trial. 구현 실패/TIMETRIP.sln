@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2000
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TIMETRIP", "TIMETRIP\TIMETRIP.vcxproj", "{4A670E39-F08B-446D-955A-2A14F81B10B9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4A670E39-F08B-446D-955A-2A14F81B10B9}.Debug|x64.ActiveCfg = Debug|x64
+		{4A670E39-F08B-446D-955A-2A14F81B10B9}.Debug|x64.Build.0 = Debug|x64
+		{4A670E39-F08B-446D-955A-2A14F81B10B9}.Debug|x86.ActiveCfg = Debug|Win32
+		{4A670E39-F08B-446D-955A-2A14F81B10B9}.Debug|x86.Build.0 = Debug|Win32
+		{4A670E39-F08B-446D-955A-2A14F81B10B9}.Release|x64.ActiveCfg = Release|x64
+		{4A670E39-F08B-446D-955A-2A14F81B10B9}.Release|x64.Build.0 = Release|x64
+		{4A670E39-F08B-446D-955A-2A14F81B10B9}.Release|x86.ActiveCfg = Release|Win32
+		{4A670E39-F08B-446D-955A-2A14F81B10B9}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3B0D737A-D1CF-4363-B1B3-B0AE05A9CE42}
+	EndGlobalSection
+EndGlobal
