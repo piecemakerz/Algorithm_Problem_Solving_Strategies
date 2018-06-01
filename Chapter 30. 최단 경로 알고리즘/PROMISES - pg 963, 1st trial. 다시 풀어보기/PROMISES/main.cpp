@@ -9,7 +9,7 @@ int V, M, N;
 const int MAX_V = 200;
 const int INF = 987654321;
 vector<vector<int>> adj; //u에서 v로 가는 간선의 가중치
-//vector<vector<int>> subadj;
+vector<vector<int>> subadj;
 
 void floyd() {
 	for (int i = 0; i < V; i++) adj[i][i] = 0;
@@ -25,25 +25,33 @@ void floyd() {
 				
 }
 
-//내 풀이. 시간초과가 발생한다.
-/*
+//내 풀이
+
 void subfloyd(int u, int v) {
 	int k1 = min(u, v);
-
+	int k2 = max(u, v);
 	//adj[i][j]가 k1-k2 고속도로를 추가함으로써 더 짧게 갱신되려면
 	//경유점으로 k1과 k2를 무조건 지나야 한다. 따라서 k를 0번 정점부터
-	//확인하는 것이 아니라 k1부터 확인해도 무방하다.
-	for (int k = k1; k < V; k++) {
-		for (int i = 0; i < V; i++) {
-			if (subadj[i][k] >= INF)
-				continue;
-			for (int j = 0; j < V; j++)
-				if (subadj[i][j] > subadj[i][k] + subadj[k][j])
-					subadj[i][j] = subadj[i][k] + subadj[k][j];
-		}
+	//확인하는 것이 아니라 k1과 k2를 경유점으로 지나는 경우만 확인하면 된다고
+	//생각했다.
+	
+	for (int i = 0; i < V; i++) {
+		if (subadj[i][k1] >= INF)
+			continue;
+		for (int j = 0; j < V; j++)
+			if (subadj[i][j] > subadj[i][k1] + subadj[k1][j])
+				subadj[i][j] = subadj[i][k1] + subadj[k1][j];
+	}
+	
+	for (int i = 0; i < V; i++) {
+		if (subadj[i][k2] >= INF)
+			continue;
+		for (int j = 0; j < V; j++)
+			if (subadj[i][j] > subadj[i][k2] + subadj[k2][j])
+				subadj[i][j] = subadj[i][k2] + subadj[k2][j];
 	}
 }
-*/
+
 
 //책의 답
 
@@ -68,23 +76,20 @@ int main(void) {
 		cin >> V >> M >> N;
 		adj = vector<vector<int>>(V, vector<int>(V, INF));
 
-		int u, v;
+		int u, v, c;
 		for (int i = 0; i < M; i++) {
-			cin >> u >> v;
-			cin >> adj[u][v];
-			adj[v][u] = adj[u][v]; 
+			cin >> u >> v >> c;
+			adj[u][v] = adj[v][u] = min(adj[u][v], c); 
 		}
 		floyd();
 
 		int newHighway;
-		//bool useful = false;
+		bool useful = false;
 		for (int i = 0; i < N; i++) {
 			cin >> u >> v >> newHighway;
 
-			/*if (adj[u][v] > newHighway) {
-				for (int i = 0; i < V; i++)
-					subadj = adj;
-				
+			if (adj[u][v] > newHighway) {
+				subadj = adj;
 				subadj[u][v] = subadj[v][u] = newHighway;
 				subfloyd(u, v);
 				for (int i = 0; i < V; i++) {
@@ -98,18 +103,16 @@ int main(void) {
 						break;
 				}
 				if (useful)
-					for (int i = 0; i < V; i++)
-						adj = subadj;
+					adj = subadj;
 				else
 					uselessHighway++;
 			}
 
 			else
 				uselessHighway++;
-			*/
-
-			if (!update(u, v, newHighway))
-				uselessHighway++;
+			
+			//if (!update(u, v, newHighway))
+			//	uselessHighway++;
 		}
 		cout << uselessHighway << endl;
 	}
