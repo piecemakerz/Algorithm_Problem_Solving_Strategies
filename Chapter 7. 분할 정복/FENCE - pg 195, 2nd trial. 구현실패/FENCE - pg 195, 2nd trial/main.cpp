@@ -76,23 +76,20 @@ int solve(int left, int right) {
 	}
 	return ret;
 }
-int main(void) {
-	int C;
-	cin >> C;
-	for (int i = 0; i < C; i++) {
-		int fenceNum;
-		int input;
-		int maxNum = 0;
-		vector<int> fences;
-		cin >> fenceNum;
 
-		for (int i = 0; i < fenceNum; i++) {
+int main(void) {
+	int C, N;
+	cin >> C;
+
+	for (int i = 0; i < C; i++) {
+		int input;
+		cin >> N;
+		for (int j = 0; j < N; j++) {
 			cin >> input;
-			fences.push_back(input);
-			if (input > maxNum)
-				maxNum = input;
+			h.push_back(input);
 		}
-		cout << CountMaxFenceAlgo1(fences) << endl;
+		cout << solve(0, h.size()-1) << endl;
+		h.clear();
 	}
 	return 0;
 }
