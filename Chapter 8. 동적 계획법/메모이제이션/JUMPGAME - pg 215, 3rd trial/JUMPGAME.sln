@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2000
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JUMPGAME", "JUMPGAME\JUMPGAME.vcxproj", "{01A9803A-3E36-412B-B47E-F74E01CE66CC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{01A9803A-3E36-412B-B47E-F74E01CE66CC}.Debug|x64.ActiveCfg = Debug|x64
+		{01A9803A-3E36-412B-B47E-F74E01CE66CC}.Debug|x64.Build.0 = Debug|x64
+		{01A9803A-3E36-412B-B47E-F74E01CE66CC}.Debug|x86.ActiveCfg = Debug|Win32
+		{01A9803A-3E36-412B-B47E-F74E01CE66CC}.Debug|x86.Build.0 = Debug|Win32
+		{01A9803A-3E36-412B-B47E-F74E01CE66CC}.Release|x64.ActiveCfg = Release|x64
+		{01A9803A-3E36-412B-B47E-F74E01CE66CC}.Release|x64.Build.0 = Release|x64
+		{01A9803A-3E36-412B-B47E-F74E01CE66CC}.Release|x86.ActiveCfg = Release|Win32
+		{01A9803A-3E36-412B-B47E-F74E01CE66CC}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C9609323-0928-4507-A581-F96F12349954}
+	EndGlobalSection
+EndGlobal
