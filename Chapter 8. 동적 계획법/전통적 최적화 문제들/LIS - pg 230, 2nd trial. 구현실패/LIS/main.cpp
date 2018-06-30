@@ -93,24 +93,87 @@ int lisInter() {
 
 //책의 답 3. 텅 빈 수열에서 시작해 숫자를 하나씩 추가해 나가며 각 길이를 갖는
 //증가 수열 중 가장 마지막 수가 작은 것은 무엇인지 추적하는 알고리즘.
+//C[]에서 이분 탐색을 함으로써 O(nlgk) <= O(nlgn)의 시간이 걸린다.
+//자세한 설명은 책의 노트 참고
 
 //C[i] = 지금까지 만든 부분 배열이 갖는 길이 i인 증가 부분 수열 중 최소의 마지막 값
 int C[MAX_N];
+//P[i] = 전체 수열 S의 i번째 원소가 C에서 위치하는 인덱스값.
+//LIS의 구성요소들을 파악하기 위한 배열이다. 이를 사용해 LIS를 찾아낼 수 있다.
+int P[MAX_N];
 
-int lis3(int start) {
-	
+//C[i]의 값을 갱신하기 위한 이분 탐색
+int binarySearch(int start, int end, int target) {
+	while (start < end) {
+		int mid = (start + end) / 2;
+		//C[mid]가 target보다 크다면 mid이하의 인덱스를 가지는 C의 값은
+		//target으로 대체될 가능성이 없으므로 start = mid+1
+		if (C[mid] < target)
+			start = mid + 1;
+		//C[mid]가 target 이상의 값을 가지면 이 값은 target으로 대체될 가능성이 있으므로
+		//end = mid
+		else
+			end = mid;
+	}
+	return start;
+}
+
+//LIS의 구성요소들을 구하는 함수
+
+void recoverLIS(int length) {
+	vector<int> lis(length);
+	int idx = length - 1;
+
+	for (int i = N - 1; i >= 0; i--) {
+		if (idx < 0)
+			break;
+		if (P[i] == idx) {
+			lis[idx--] = sequence[i];
+		}
+	}
+	for (int i = 0; i < lis.size(); i++)
+		cout << lis[i] << ' ';
+	cout << endl;
+	return;
+}
+
+int lis3() {
+	C[0] = sequence[0];
+	P[0] = 0;
+
+	int length = 1;
+	for (int idx = 1; idx < N; idx++) {
+		int inputIdx;
+
+		if (C[0] > sequence[idx]) {
+			inputIdx = 0;
+			C[0] = sequence[idx];
+		}
+		else if (C[length - 1] < sequence[idx]) {
+			inputIdx = length;
+			C[length++] = sequence[idx];
+		}
+		else {
+			inputIdx = binarySearch(0, length, sequence[idx]);
+			C[inputIdx] = sequence[idx];
+		}
+		P[idx] = inputIdx;
+	}
+	//recoverLIS(length);
+	return length;
 }
 
 int main(void) {
 	cin >> T;
 	for (int test = 0; test < T; test++) {
 		memset(cache, -1, sizeof(cache));
-		memset(C, 0, sizeof(C));
+		memset(C, -1, sizeof(C));
+		memset(P, -1, sizeof(P));
 
 		cin >> N;
 		for (int i = 0; i < N; i++)
 			cin >> sequence[i];
-		//cout << maxSeqlen() << endl;
+		cout << lis3() << endl;
 	}
 	return 0;
 }
