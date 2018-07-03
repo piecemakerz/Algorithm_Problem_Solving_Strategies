@@ -39,6 +39,31 @@ int Quantize(int start, int slice) {
 	return ret;
 }
 
+int myQuantize(int start, int slice) {
+	if (start == n - slice)
+		return 0;
+	else if (slice == 1)
+		return calSquaredError(start, n - 1);
+
+	int& ret = cache[slice - 1][start];
+	if (ret != INF) return ret;
+
+	for (int i = start + 1; i < n - slice; i++)
+		ret = min(ret, myQuantize(i, slice - 1) + calSquaredError(start, i - 1));
+	return ret;
+}
+
+int myQuantize2(int start, int slice) {
+	if (start == n)	return 0;
+	if (slice == 0) return INF;
+	int& ret = cache[slice - 1][start];
+	if (ret != INF) return ret;
+	for (int next = start + 1; next <= n; next++)
+		ret = min(ret, myQuantize2(next, slice - 1) + calSquaredError(start, next - 1));
+	return ret;
+}
+
+
 int main(void) {
 	cin >> C;
 	for (int test = 0; test < C; test++) {
@@ -55,7 +80,7 @@ int main(void) {
 		for (int i = 0; i < n; i++)
 			cin >> Seq[i];
 		sort(Seq.begin(), Seq.end());
-		cout << Quantize(0, s) << endl;
+		cout << myQuantize2(0, s) << endl;
 		Seq.clear();
 	}
 	return 0;
