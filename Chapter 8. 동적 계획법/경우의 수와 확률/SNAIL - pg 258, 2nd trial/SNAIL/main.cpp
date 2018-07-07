@@ -5,8 +5,8 @@ using namespace std;
 int C, n, m;
 double cache[1000][1000];
 
-//현재까지 date일이 지났고 meter미터를 올라갔을 때,
-//m일 안에 n미터를 올라갈 수 있는 확률
+//climb(date, meter) = 현재까지 date일이 지났고 meter미터를
+//올라갔을 때, m일 안에 n미터를 올라갈 수 있는 확률
 double climb(int date, int meter) {
 	if (meter >= n)
 		return 1;
