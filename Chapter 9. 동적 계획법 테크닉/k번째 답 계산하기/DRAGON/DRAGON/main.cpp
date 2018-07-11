@@ -20,17 +20,22 @@ int findMaxLength(int ageLeft) {
 }
 
 int curve2(string curStr, int curP, int age) {
-	if (l <= 0 || curP >= MAX)
-		return MAX;
+	int len = curStr.length();
 
-	if (age == n && l > 0 && curP >= p) {
-		int idx = 0;
-		while (l > 0 && idx < curStr.length()) {
-			cout << curStr[idx++];
-			l--;
-			curP++;
+	if (age == n) {
+		if (curP + len <= p)
+			return curP + len;
+		else {
+			int idx = 0;
+			while (l > 0 && idx < curStr.length()) {
+				if (curP + idx >= p) {
+					cout << curStr[idx++];
+					l--;
+				}
+				curP++;
+			}
+			return curP;
 		}
-		return curP;
 	}
 
 	for (int i = 0; i < curStr.length(); i++) {
@@ -45,12 +50,13 @@ int curve2(string curStr, int curP, int age) {
 			else
 				curP = curve2("FX-Y", curP, age + 1);
 		}
-		else
+		else {
 			if (curP >= p && l > 0) {
 				cout << curStr[i];
 				l--;
-				curP++;
 			}
+			curP++;
+		}
 	}
 	return curP;
 }
