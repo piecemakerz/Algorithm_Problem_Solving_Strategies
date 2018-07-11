@@ -64,7 +64,8 @@ double ORC(int count, int prev) {
 			//word[sel]이 Q[0]에 위치할 확률이 0이라면 이후를 확인하지 않는다.
 			if (B[sel] == MIN)
 				continue;
-			//Q[0]이 word[sel]일 확률 반환
+			//OCR(count+1, sel) * 'word[sel]이 Q[0]일 확률' * 'word[sel]을 분류기가 'word[curStr]로 분류했을 확률
+			//로그 값을 취했으므로 곱하는 대신 더한다.
 			result = ORC(count + 1, sel) + B[sel] + M[sel][curStr];
 		}
 		//Q[0] 이후 단어 선정
@@ -73,6 +74,8 @@ double ORC(int count, int prev) {
 			//분류된 확률이 0이라면 확인하지 않는다.
 			if (T[prev][sel] == MIN || M[sel][curStr] == MIN)
 				continue;
+			//OCR(count+1, sel) * 'word[prev]의 다음 단어가 word[sel]일 확률' * 'word[sel]을 분류기가 'word[curStr]로
+			//분류했을 확률. 로그 값을 취했으므로 곱하는 대신 더한다.
 			result = ORC(count + 1, sel) + T[prev][sel] + M[sel][curStr];
 		}
 
@@ -92,19 +95,19 @@ int main(void) {
 	for (int i = 0; i < m; i++)
 		cin >> word[i];
 	for (int i = 0; i < m; i++) {
-		cin >> dinput;
+		scanf("%lf", &dinput);
 		B[i] = log(dinput);
 	}
 
 	for (int i = 0; i < m; i++)
 		for (int j = 0; j < m; j++) {
-			cin >> dinput;
+			scanf("%lf", &dinput);
 			T[i][j] = log(dinput);
 		}
 
 	for (int i = 0; i < m; i++)
 		for (int j = 0; j < m; j++) {
-			cin >> dinput;
+			scanf("%lf", &dinput);
 			M[i][j] = log(dinput);
 		}
 
@@ -128,7 +131,7 @@ int main(void) {
 		//원본 문장 재구성. 원본 문장의 첫번째 단어 번호는 origin[0][0]에 저장되어 있다.
 		int nextStr = origin[0][0];
 		for (int i = 1; i <= n; i++) {
-			cout << word[nextStr] << ' ';
+			cout<<word[nextStr]<<' ';
 			nextStr = origin[i][nextStr + 1];
 		}
 		cout << endl;
