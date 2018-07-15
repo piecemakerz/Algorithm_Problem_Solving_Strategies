@@ -55,13 +55,13 @@ int bijection(const vector<string>& board) {
 int cache[19683];
 //내가 이길 수 있으면 1을, 비길 수 있으면 0을, 지면 -1을 리턴한다.
 int canWin(vector<string>& board, char turn) {
-	//기저 사례: 마지막에 상대가 둬서 한 줄이 만들어진 경우 - 이번 차례가 둬 볼 필요도 없이 패배이다.
+	//기저 사례: 마지막에 상대가 둬서 한 줄이 만들어진 경우
 	if (isFinished(board, 'o' + 'x' - turn)) return -1;
 	int& ret = cache[bijection(board)];
 	if (ret != -2) return ret;
 	//모든 반환 값의 min을 취한다.
 	int minValue = 2;
-	for(int y=0; y<3; y++)
+	for (int y = 0; y<3; y++)
 		for (int x = 0; x < 3; x++) {
 			if (board[y][x] == '.') {
 				board[y][x] = turn;
@@ -70,7 +70,7 @@ int canWin(vector<string>& board, char turn) {
 			}
 		}
 
-	//플레이 할 수 없거나(보드에 빈 칸이 없는 경우 등), 어떻게 해도 비기는 것이 최선인 경우
+	//플레이 할 수 없거나, 어떻게 해도 비기는 것이 최선인 경우
 	if (minValue == 2 || minValue == 0) return ret = 0;
 	//최선이 상대가 이기는 것이라면 난 무조건 지고, 상대가 지는 거라면 난 이긴다.
 	return ret = -minValue;
@@ -90,7 +90,7 @@ int main(void) {
 			cin >> inputStr;
 			inputArr.push_back(inputStr);
 		}
-		
+
 		for (int y = 0; y < 3; y++) {
 			for (int x = 0; x < 3; x++) {
 				if (inputArr[y][x] == 'x')
@@ -106,4 +106,3 @@ int main(void) {
 		else cout << "TIE" << endl;
 	}
 	return 0;
-}
