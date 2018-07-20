@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 using namespace std;
+//회의실 예약 문제를 해결하는 탐욕적 알고리즘
 //각 회의는 [begin, end) 구간 동안 회의실을 사용한다.
 int n;
 int meetBegin[100], meetEnd[100];
@@ -26,17 +27,18 @@ int schedule() {
 	return selected;
 }
 
-int before[100];
+int before[100], meeting[100];
 //동적 계획법을 사용한 알고리즘
-//schedule(int idx) = order[idx] 혹은 그 이전에 끝나는 회의들 중 선택할 수 있는 최대 회의의 수.
+//schedule(int idx) = meeting[idx] 혹은 그 이전에 끝나는 회의들 중 선택할 수 있는 최대 회의의 수.
 int schedule(int idx) { // n-1부터 시작
 	if (idx == -1)
 		return 0;
 
 	int ret = 0;
-	if(idx > 0)
-		ret = schedule(idx - 1); // order[idx] 선택하지 않음
-	ret = max(ret, 1 + schedule(before[idx])); // order[idx] 선택
+	if(idx >= 0)
+		ret = schedule(idx - 1); // meeting[idx] 선택하지 않음
+	ret = max(ret, 1 + schedule(before[idx])); // meeting[idx] 선택
+	//idx번 회의가 시작하기 전에 끝나는 회의가 존재하지 않을 경우 before[idx] = -1이다.
 	return ret;
 }
 
