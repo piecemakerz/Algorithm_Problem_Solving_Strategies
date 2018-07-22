@@ -3,26 +3,20 @@
 #include <algorithm>
 using namespace std;
 
-int C, n;
-const int MAX = INT_MAX;
-int M[10000], E[10000];
-vector <pair<int, int>> ME;
-int main(void) {
-	cin >> C;
-	for (int test = 0; test < C; test++) {
-		cin >> n;
-		for (int i = 0; i < n; i++){
-			cin >> M[i];
-		for (int i = 0; i < n; i++)
-			cin >> E[i];
-
-		for (int i = 0; i < n; i++)
-			ME.push_back(make_pair(M[i], E[i]));
-		
-		sort(ME.begin(), ME.end(), greater<int>());
-		int minE = INT_MAX, maxM = ME.back().first;
-		for (int i = n - 1; i >= 0; i--) {
-			if()
-		}
+const int MAX_N = 10000;
+int n, e[MAX_N], m[MAX_N];
+int heat() {
+	//어느 순서로 데워야 할지를 정한다.
+	vector<pair<int, int>> order;
+	for (int i = 0; i < n; i++)
+		order.push_back(make_pair(e[i], i));
+	sort(order.begin(), order.end(), greater<int>());
+	//해당 순서대로 데워먹는 과정을 시뮬레이션한다.
+	int ret = 0, beginEat = 0;
+	for (int i = 0; i < n; i++) {
+		int box = order[i].second;
+		beginEat += m[box];
+		ret = max(ret, beginEat + e[box]);
 	}
+	return ret;
 }
