@@ -1,12 +1,16 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <iostream>
+#include <cstring>
 using namespace std;
 
-//블록의 회전된 형태를 계산하고 상대좌표의 목록으로 변환하기
-vector<vector<pair<int, int>>> rotations;
+int T, R, C;
 //블록의 크기
 int blockSize;
+//블록의 회전된 형태를 계산하고 상대좌표의 목록으로 변환하기
+vector<vector<pair<int, int>>> rotations;
+
 //2차원 배열 arr을 시계방향으로 90도 돌린 결과를 반환한다.
 vector<string> rotate(const vector<string>& arr) {
 	vector<string> ret(arr[0].size(), string(arr.size(), ' '));
@@ -52,9 +56,26 @@ int covered[10][10];
 int best;
 //(y, x)를 왼쪽 위칸으로 해서 주어진 블록을 delta = 1이면 놓고, -1이면 없앤다.
 //블록을 놓을 때 이미 놓인 블록이나 검은 칸과 겹치면 거짓을, 아니면 참을 반환한다.
-bool set(int y, int x, const vector<pair<int, int>>& block, int delta);
+bool set(int y, int x, const vector<pair<int, int>>& block, int delta) {
+	bool ok = true;
+	int placex, placey;
+	for (int i = 0; i < block.size(); i++) {
+		placex = x + block[i].second, placey = y + block[i].first;
+		if (placex < 0 || placex >= boardW || placey < 0 || placey >= boardH) ok = false;
+		else {
+			covered[placey][placex] += delta;
+			if (covered[placey][placex] > 1) ok = false;
+		}
+	}
+	return ok;
+}
+int simpleHeuristic(int whiteSpace) {
+	return whiteSpace / blockSize;
+}
 //placed: 지금까지 놓은 블록의 수
-void search(int placed) {
+void search(int placed, int whiteSpace) {
+	if (simpleHeuristic(whiteSpace) + placed <= best)
+		return;
 	//아직 채우지 못한 빈 칸 중 가장 윗줄 왼쪽에 있는 칸을 찾는다.
 	int y = -1, x = -1;
 	for (int i = 0; i < boardH; i++){
@@ -74,24 +95,45 @@ void search(int placed) {
 	//이 칸을 덮는다.
 	for (int i = 0; i < rotations.size(); i++) {
 		if (set(y, x, rotations[i], 1))
-			search(placed + 1);
+			search(placed + 1, whiteSpace - blockSize);
 		set(y, x, rotations[i], -1);
 	}
 	//이 칸을 덮지 않고 '막아'둔다.
 	covered[y][x] = 1;
-	search(placed);
+	search(placed, whiteSpace - 1);
 	covered[y][x] = 0;
 }
 int solve() {
+	int whiteSpace = 0;
 	best = 0;
 	//covered 배열을 초기화한다.
 	for (int i = 0; i < boardH; i++)
-		for (int j = 0; j < boardW; j++)
+		for (int j = 0; j < boardW; j++) {
 			covered[i][j] = (board[i][j] == '#' ? 1 : 0);
-	search(0);
+			if (!covered[i][j]) whiteSpace++;
+		}
+	search(0, whiteSpace);
 	return best;
 }
 
 int main(void) {
-
+	cin >> T;
+	for (int test = 0; test < T; test++) {
+		memset(covered, 0, sizeof(covered));
+		vector<string> block;
+		string input;
+		cin >> boardH >> boardW >> R >> C;
+		for (int i = 0; i < boardH; i++) {
+			cin >> input;
+			board.push_back(input);
+		}
+		for (int i = 0; i < R; i++) {
+			cin >> input;
+			block.push_back(input);
+		}
+		generateRotations(block);
+		cout << solve() << endl;
+		rotations.clear();
+		board.clear();
+	}
 }
