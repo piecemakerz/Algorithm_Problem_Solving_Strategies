@@ -3,41 +3,37 @@
 #include <algorithm>
 #include <bitset>
 #include <cstring>
+#include <cstdio>
 using namespace std;
 
-const int MAXN = 55;
+const int MAXN = 20;
 const int WHITE = 1;
 const int BLACK = 0;
 int C;
 //비트마스크를 이용한 카쿠로의 후보 구하기
 
-int maskSum[1024], maskLen[1024];
-void calcMasks() {
-	memset(maskSum, 0, sizeof(maskSum));
-	memset(maskLen, 0, sizeof(maskLen));
-	for (int mask = 0; mask < 1024; mask++) {
-		for (int i = 0; i < 10; i++)
-			if (mask & (1 << i)) {
-				maskSum[mask] += i;
-				maskLen[mask]++;
-			}
-	}
-}
 //mask에 속한 원소들의 개수를 반환한다.
 int getSize(int mask) {
-	return maskLen[mask];
+	bitset<10> numbers(mask);
+	return numbers.count();
 }
 //mask에 속한 원소들의 합을 반환한다.
 int getSum(int mask) {
-	return maskSum[mask];
+	int sum = 0;
+	bitset<10> numbers(mask);
+	for (int i = 1; i < 10; i++)
+		if (numbers[i])
+			sum += i;
+	return sum;
 }
+
 //len칸의 합이 sum이고, 이 칸들에 이미 쓰인 수의 집합이 known일 때
 //나머지 칸에 들어갈 수 있는 숫자의 집합을 반환한다.
 int getCandidates(int len, int sum, int known) {
 	//조건에 부합하는 집합들의 합집합
 	int allSets = 0;
 	//1~9의 부분집합을 모두 생성하고, 그 중
-	for (int set = 0; set < 1024; set++)
+	for (int set = 0; set < 1024; set += 2)
 		//known을 포함하고, 크기가 len이며, 합이 sum인 집합을 모두 찾는다.
 		if ((set & known) == known && getSize(set) == len && getSum(set) == sum)
 			allSets |= set;
@@ -49,12 +45,13 @@ int getCandidates(int len, int sum, int known) {
 
 //candidates[len][sum][known] = getCandidates(len, sum, known)
 int candidates[10][46][1024];
-//candidates[][][]를 미리 계산해 둔다.
+//candidates[][][]를 미리 계산해 둔다. 즉, 가능한 모든 한 줄의 상태에 대하여
+//가능한 모든 known(=subset)을 검사하여 candidates[l][s][subset]을 계산한다.
 void generateCandidates() {
 	//우선 전부 0으로 초기화
 	memset(candidates, 0, sizeof(candidates));
 	//1~9의 부분집합을 전부 생성한다.
-	for (int set = 0; set < 1024; set++) {
+	for (int set = 0; set < 1024; set += 2) {
 		//집합의 크기와 원소의 합을 계산해 둔다.
 		int l = getSize(set), s = getSum(set);
 		//set의 모든 부분집합에 대해 candidates[][][]를 갱신한다.
@@ -108,8 +105,8 @@ int getCandCoord(int y, int x) {
 void printSolution() {
 	for (int i = 0; i < n; i++) {
 		for (int j = 0; j < n; j++)
-			printf("%s%d", (j ? " " : ""), value[i][j]);
-		printf("\n");
+			cout<< value[i][j] << ' ';
+		cout << endl;
 	}
 }
 //답을 찾았으면 true, 아니면 false를 반환한다.
@@ -127,6 +124,7 @@ bool search() {
 			}
 	//이 칸에 들어갈 숫자가 없으면 실패
 	if (minCands == 0) return false;
+	//모든 칸을 채웠으면 카쿠로 완성
 	if (y == -1) {
 		printSolution();
 		return true;
@@ -143,7 +141,6 @@ bool search() {
 
 int main(void) {
 	cin >> C;
-	calcMasks();
 	generateCandidates();
 	for (int test = 0; test < C; test++) {
 		memset(hint, -1, sizeof(hint));
