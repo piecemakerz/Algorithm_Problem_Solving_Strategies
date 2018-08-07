@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <cassert>
+#include <cstdio>
 using namespace std;
 
 #define EPSILON 0.0001
@@ -55,6 +56,8 @@ struct vector2 {
 	}
 };
 
+int c, n;
+
 //두 벡터의 방향성을 판단하는 ccw() 함수의 구현
 //원점에서 벡터 b가 벡터 a의 반시계 방향이면 양수, 시계 방향이면 음수
 double ccw(vector2 a, vector2 b) {
@@ -103,7 +106,7 @@ polygon curPoly(const polygon& p,
 	}
 	return ret;
 }
-//서덜랜드-호치맨(Sutherland-Hodgman) 알고리즘을 이용한 다각형 클리핑
+//서덜랜드-호지맨(Sutherland-Hodgman) 알고리즘을 이용한 다각형 클리핑
 polygon intersection(const polygon& p, double x1, double y1,
 	double x2, double y2) {
 	vector2 a(x1, y1), b(x2, y1), c(x2, y2), d(x1, y2);
@@ -113,6 +116,30 @@ polygon intersection(const polygon& p, double x1, double y1,
 	ret = curPoly(ret, d, a);
 	return ret;
 }
-int main(void) {
 
+//주어진 단순 다각형 p의 넓이를 구한다.
+//p는 각 꼭지점의 위치 벡터의 집합으로 주어진다.
+double area(const vector<vector2>& p) {
+	double ret = 0;
+	for (int i = 0; i < p.size(); i++) {
+		int j = (i + 1) % p.size();
+		ret += p[i].x * p[j].y - p[j].x * p[i].y;
+	}
+	return fabs(ret) / 2.0;
+}
+
+int main(void) {
+	cin >> c;
+	for (int test = 0; test < c; test++) {
+		int x1, y1, x2, y2;
+		cin >> x1 >> y1 >> x2 >> y2 >> n;
+		polygon inputPoly;
+		int inputx, inputy;
+		for (int i = 0; i < n; i++) {
+			cin >> inputx >> inputy;
+			inputPoly.push_back(vector2(inputx, inputy));
+		}
+		polygon resultPoly = intersection(inputPoly, x1, y1, x2, y2);
+		printf("%.10f\n", area(resultPoly));
+	}
 }
