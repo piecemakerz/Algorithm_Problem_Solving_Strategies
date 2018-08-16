@@ -68,10 +68,13 @@ int C, N, K;
 const int MAXN = 100000;
 int D[MAXN];
 
-void partialSum(vector<int>& psum) {
-	psum[1] = D[0]%K;
+//이 문제에서는 psum[-1], 즉 아무것도 고르지 않는 부분합도
+//고려하므로 psum[0] = 0으로 놓고 실질적인 부분합을 psum[1]에서부터
+//저장한다. 즉, psum[i] = (D[0]~D[i-1]까지의 합) % k이다.
+void partialSum(vector<int>& psum, int k) {
+	psum[1] = D[0] % k;
 	for (int i = 2; i < psum.size(); i++)
-		psum[i] = (psum[i - 1] + D[i-1])%K;
+		psum[i] = (psum[i - 1] + D[i - 1]) % k;
 }
 //D[]의 부분 합 배열 psum[]과 k가 주어질 때, 몇 가지 방법으로 살 수 있는지 반환한다.
 //psum[]의 첫 번째 원소 전에 0을 삽입했다고 가정한다.
@@ -79,6 +82,7 @@ int waysToBuy(const vector<int>& psum, int k) {
 	const int MOD = 20091101;
 	int ret = 0;
 	//psum[]의 각 값을 몇 번이나 본 적 있는지 기록한다.
+	//psum[]의 값 범위는 0~k-1이다.
 	vector<long long> count(k, 0);
 	for (int i = 0; i < psum.size(); i++)
 		count[psum[i]]++;
@@ -121,7 +125,7 @@ int main(void) {
 
 		vector<int> psum(N + 1, 0);
 		psum[0] = 0;
-		partialSum(psum);
+		partialSum(psum, K);
 		vector<int>::iterator iter = psum.begin();
 
 		printf("%d %d\n", waysToBuy(psum, K), maxBuys(psum, K));
