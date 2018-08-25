@@ -20,8 +20,8 @@
 #include <cmath>
 using namespace std;
 
-int M;
-int MAX; // 한 노드가 가질 수 있는 최대 데이터
+int M; // 차수
+int MAX; // 한 노드가 가질 수 있는 최대 데이터(=M)
 int MIN; // 한 노드가 가질 수 있는 최소 데이터
 
 typedef struct Node {
@@ -111,6 +111,7 @@ public:
 	//노드 상의 새로운 데이터의 위치(index)를 리턴한다.
 	int insertData(int inputData, Node * leftTree, Node * rightTree) {
 		int i = count - 1;
+		//데이터를 넣을 자리를 마련하기 위해 inputData보다 큰 값들을 한칸씩 뒤로 옮긴다.
 		while (i >= 0 && data[i] > inputData) {
 			data[i + 1] = data[i];
 			children[i + 2] = children[i + 1];
@@ -130,10 +131,9 @@ public:
 			return false;
 
 		else {
-			int i = idx + 1;
 			if (idx == 0)
 				children[0] = NULL;
-			for (; i < count; i++) {
+			for (int i = idx + 1; i < count; i++) {
 				data[i - 1] = data[i];
 				children[i] = children[i + 1];
 			}

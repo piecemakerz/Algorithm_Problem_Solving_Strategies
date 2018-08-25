@@ -1,39 +1,12 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <string>
 using namespace std;
 
-//접미사 배열을 계산하는 단순한 알고리즘
+int C, K;
+string script;
 
-//두 접미사의 시작 위치 i, j가 주어질 때 두 접미사 중 어느 쪽이 앞에 와야 할지 비교한다.
-struct SuffixComparator {
-	const string& s;
-	SuffixComparator(const string& s) : s(s) {}
-	bool operator()(int i, int j) {
-		//s.substr() 대신에 strcmp()를 쓰면 임시 객체를 만드는 비용이 절약된다.
-		//strcmp()는 s[i...]가 s[j...]보다 사전 순으로 앞에 있다면 -1, 뒤에 있다면 1을 반환하므로
-		//operator()은 i가 앞에 와야 한다면 true, j가 앞에 와야 한다면 false를 반환한다.
-		//string 클래스의 멤버함수 c_str()은 문자열의 첫번째 문자의 주소를 반환한다.
-		return strcmp(s.c_str() + i, s.c_str() + j) < 0;
-	}
-};
-
-//s의 접미사 배열을 계산한다. O(n^2*lgn)의 시간이 걸린다.
-vector<int> getSuffixArrayNaive(const string& s) {
-	//접미사 시작 위치를 담은 배열을 만든다.
-	vector<int> perm;
-	for (int i = 0; i < s.size(); i++)
-		perm.push_back(i);
-	//접미사를 비교하는 비교자를 이용해 정렬하면 완성.
-	sort(perm.begin(), perm.end(), SuffixComparator(s));
-	return perm;
-}
-
-//첫 t글자로 묶인 그룹 정보를 이용해 첫 2t글자를 비교하는 비교자의 구현
-
-//각 접미사들의 첫 t글자를 기준으로 한 그룹 번호가 주어질 때,
-//주어진 두 접미사를 첫 2*t글자를 기준으로 비교한다.
-//group[]은 길이가 0인 접미사도 포함한다.
 struct Comparator {
 	const vector<int>& group;
 	int t;
@@ -77,8 +50,8 @@ vector<int> getSuffixArray(const string& s) {
 		vector<int> newGroup(n + 1);
 		newGroup[n] = -1;
 		newGroup[perm[0]] = 0; // 첫 2t글자 기준으로 사전순으로 정렬했을 때 가장 앞에 오는 접미사의
-		//그룹 번호를 0으로 설정한다. 이후 첫 2t글자가 같다면 같은 그룹번호로, 다르다면 그룹 번호를
-		//1만큼 더 올린다.
+							   //그룹 번호를 0으로 설정한다. 이후 첫 2t글자가 같다면 같은 그룹번호로, 다르다면 그룹 번호를
+							   //1만큼 더 올린다.
 
 		for (int i = 1; i < n; i++)
 			if (compareUsing2T(perm[i - 1], perm[i]))
@@ -87,5 +60,33 @@ vector<int> getSuffixArray(const string& s) {
 				newGroup[perm[i]] = newGroup[perm[i - 1]];
 		group = newGroup;
 	}
-	return perm; 
+	return perm;
+}
+
+//s[i...]와 s[j...]의 공통 접두사의 최대 길이를 계산한다.
+int commonPrefix(const string& s, int i, int j) {
+	int k = 0;
+	while (i < s.size() && j < s.size() && s[i] == s[j]) {
+		i++; j++; k++;
+	}
+	return k;
+}
+
+//접미사 배열을 이용해 말버릇 문제를 해결하는 알고리즘.
+
+//k번 이상 출현하는 s의 부분 문자열 중 최대 길이를 찾는다.
+int longestFrequent(int k, const string& s) {
+	vector<int> a = getSuffixArray(s);
+	int ret = 0;
+	for (int i = 0; i + k <= s.size(); i++)
+		ret = max(ret, commonPrefix(s, a[i], a[i + k - 1]));
+	return ret;
+}
+
+int main(void) {
+	cin >> C;
+	for (int test = 0; test < C; test++) {
+		cin >> K >> script;
+		cout << longestFrequent(K, script) << endl;
+	}
 }

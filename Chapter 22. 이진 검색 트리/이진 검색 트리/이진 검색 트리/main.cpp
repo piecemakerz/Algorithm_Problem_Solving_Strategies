@@ -20,7 +20,7 @@ typedef struct Node {
 	}
 } Node;
 
-//노드의 검색
+//노드의 검색. 검색에 실패할 경우 NULL를 반환한다.
 Node* searchNode(Node* node, int data) {
 	if (node == NULL || node->data == data) return node;
 
@@ -81,7 +81,9 @@ void insertNode(Node*& Tree, int data) {
 		prevNode->right = newNode;
 }
 
-//두 트리 합치기
+//두 트리 합치기. LTree의 루트 노드를 합친 트리의 루트로 설정한 후.
+//RTree와 LTree의 오른쪽 서브트리를 재귀적으로 합쳐 LTree의 새로운
+//오른쪽 트리로 한다.
 Node* combineTree(Node * LTree, Node * RTree) {
 	Node * newRoot = LTree;
 	if (newRoot == NULL)
@@ -90,6 +92,7 @@ Node* combineTree(Node * LTree, Node * RTree) {
 		return newRoot;
 
 	newRoot->right = combineTree(newRoot->right, RTree);
+	//합친 트리를 오른쪽 자식으로 한다.
 	if (newRoot->right != NULL)
 		newRoot->right->parent = newRoot;
 	return newRoot;
@@ -104,6 +107,7 @@ Node* removeNode(Node*& Tree, int data) {
 		return NULL;
 	}
 	
+	//replaceNode = 삭제할 노드의 자리에 위치할 노드
 	Node * replaceNode = combineTree(delNode->left, delNode->right);
 	replaceNode->parent = delNode->parent;
 
@@ -163,8 +167,10 @@ Node * removeNodeOther(Node*& Tree, int data) {
 			delNode->parent->left = replaceNode;
 	}
 	//삭제할 노드가 두 개의 자식을 가질 경우
-	//오른쪽 서브 트리에서 가장 작은 값(delNode의 직후노드)으로 대체한다.
-	//직후노드는 왼쪽 자식이 존재하지 않는다.
+	//1. 삭제할 노드를 대체할 노드(replaceNode)를 찾고
+	//2. 대체할 노드에 저장할 값을 삭제할 노드에 대입하고
+	//3. 대체할 노드의 부모 노드와 자식노드를 연결(주소값)한다.
+	//대체할 노드는 서브트리에서 가장 작은 값이므로 왼쪽 자식이 존재하지 않는다.
 	else {
 		replaceNode = findSuccessor(delNode);
 		delNode->data = replaceNode->data;
@@ -177,20 +183,7 @@ Node * removeNodeOther(Node*& Tree, int data) {
 		if (replaceNode->right != NULL)
 			replaceNode->right->parent = replaceNode->parent;
 
-		replaceNode->parent = delNode->parent;
-		if (delNode->parent == NULL) {
-			Tree = replaceNode;
-			replaceNode->left = delNode->left;
-			replaceNode->right = delNode->right;
-			if (replaceNode->left != NULL)
-				replaceNode->left->parent = replaceNode;
-			if (replaceNode->right != NULL)
-				replaceNode->right->parent = replaceNode;
-		}
-		else if (delNode->parent->right == delNode)
-			delNode->parent->right = replaceNode;
-		else
-			delNode->parent->left = replaceNode;
+		delNode = replaceNode;
 	}
 	delete(delNode);
 	return replaceNode;
@@ -271,7 +264,7 @@ int main(void) {
 		cin >> data;
 		if (data == -1)
 			break;
-		removeNodeBook(root, data);
+		removeNodeOther(root, data);
 		if (root == NULL)
 			break;
 		printTree(root);
