@@ -203,10 +203,10 @@ Node* nodeSplit(Node * node) {
 		RTree->children[0]->parent = RTree;
 	if(RTree->children[1] != NULL)
 		RTree->children[1]->parent = RTree;
-
+	
 	for (int i = median + 2; i < node->count; i++) {
 		RTree->insertData(node->data[i], RTree->children[RTree->count], node->rightChildOf(i));
-		if(RTree->children[i-median] != NULL)
+		if(RTree->children[i - median] != NULL)
 			RTree->children[i - median]->parent = RTree;
 	}
 
@@ -297,20 +297,13 @@ void deleteData(int data) {
 	//underflow가 발생한다면 '부족한' 노드에서부터 트리 재조정을 시작한다.
 	//underflowNode의 자식들은 모두 정렬된 상태이기 때문에 건드리지 않는다.
 	while (needsRebalancing) {
-		cout << "underflow occured" << endl;
-
 		Node * sibling;
 		Node * parent = underflowNode->parent;
 
 		int seperator = underflowNode->leftParentIdx();
 		//만약 '부족한' 노드의 오른쪽 형제가 존재하며 오른쪽 형제노드가 underflow될 가능성이 없다면
 		if (seperator != -1 && parent->rightChildOf(seperator) != NULL && parent->rightChildOf(seperator)->canGiveData()) {
-			//cout << "right sibling exists" << endl;
 			sibling = parent->rightChildOf(seperator);
-			//cout << "sibling node: ";
-			//for (int i = 0; i < sibling->count; i++)
-				//cout << sibling->data[i] << ' ';
-			cout << endl;
 			//왼쪽 회전을 한다.
 			//seperator를 '부족한 노드'의 끝에 삽입한다.
 			//오른쪽 형제의 맨 처음 자식은 삽입한 seperator의 오른쪽 자식이 되도록 한다.
@@ -321,10 +314,6 @@ void deleteData(int data) {
 			parent->data[seperator] = sibling->data[0];
 			//오른쪽 형제 노드에서 맨 앞 데이터를 삭제한다. 이 노드는 underflow될 가능성이 없으므로
 			//삭제해도 B트리의 균형이 틀어지지 않는다.
-			//cout << "Fixed underflowNode Node: " << endl;
-			//for (int i = 0; i < underflowNode->count; i++)
-				//cout << underflowNode->data[i] << ' ';
-			//cout << endl;
 			sibling->deleteData(sibling->data[0]);
 			needsRebalancing = false;
 			break;
@@ -333,12 +322,7 @@ void deleteData(int data) {
 		seperator = underflowNode->rightParentIdx();
 		//만약 '부족한' 노드의 왼쪽 형제가 존재하며 왼쪽 형제노드가 underflow될 가능성이 없다면
 		if (seperator != -1 && parent->leftChildOf(seperator) != NULL && parent->leftChildOf(seperator)->canGiveData()) {
-			//cout << "left sibling exists" << endl;
 			sibling = parent->leftChildOf(seperator);
-			//cout << "sibling node: ";
-			//for (int i = 0; i < sibling->count; i++)
-			//	cout << sibling->data[i] << ' ';
-			//cout << endl;
 			//오른쪽 회전을 한다.
 			//seperator를 '부족한 노드'의 맨 앞에 삽입한다.
 			//왼쪽 형제의 맨 마지막 자식은 삽입한 seperator의 왼쪽 자식이 되도록 한다.
@@ -349,16 +333,12 @@ void deleteData(int data) {
 			parent->data[seperator] = sibling->data[(sibling->count)-1];
 			//왼쪽 형제 노드에서 마지막 데이터를 삭제한다. 이 노드는 underflow될 가능성이 없으므로
 			//삭제해도 B트리의 균형이 틀어지지 않는다.
-			//cout << "Fixed underflowNode Node: " << endl;
-			//for (int i = 0; i < underflowNode->count; i++)
-			//	cout << underflowNode->data[i] << ' ';
-			//cout << endl;
 			sibling->deleteData(sibling->data[(sibling->count)-1]);
 			needsRebalancing = false;
 			break;
 		}
-		//cout << "left sibling and right sibling has no enough data" << endl;
 		//만약 왼쪽 형제노드와 오른쪽 형제노드 모두에서 데이터를 가져와 '부족한 노드'에 채워넣을 수 없다면
+		//트리의 합병을 통해 언더플로 상태에서 벗어난다.
 		Node * leftTree, * rightTree;
 		//왼쪽 형제노드가 존재할 때 leftTree는 왼쪽 형제 노드, rightTree는 현재 노드를 가리킨다.
 		if (underflowNode->rightParentIdx() != -1) {
@@ -372,16 +352,7 @@ void deleteData(int data) {
 			leftTree = underflowNode;
 			rightTree = parent->children[seperator+1];
 		}
-		//cout << "left Tree : ";
-		//for (int i = 0; i < leftTree->count; i++) {
-		//	cout << leftTree->data[i] << ' ';
-		//}
-		//cout << endl;
-		//cout << "right Tree: ";
-		//for (int i = 0; i < rightTree->count; i++) {
-		//	cout << rightTree->data[i] << ' ';
-		//}
-		cout << endl;
+
 		//seperator의 데이터를 왼쪽 트리의 끝에 삽입한다.
 		leftTree->insertData(parent->data[seperator], leftTree->children[leftTree->count], NULL);
 		//오른쪽 트리의 모든 데이터를 왼쪽 트리로 옮긴다. 
@@ -405,37 +376,21 @@ void deleteData(int data) {
 		parent->children[parent->count] = NULL;
 		parent->data[(parent->count) - 1] = -1;
 		parent->count--;
-		//cout << "left tree after fixed : ";
-		//for (int i = 0; i < leftTree->count; i++) {
-		//	cout << leftTree->data[i] << ' ';
-		//}
-		//cout << endl;
-		//cout << "parent tree after delete : ";
-		//for (int i = 0; i < parent->count; i++) {
-		//	cout << parent->data[i] <<' ';
-		//}
-		//cout << endl;
+
 		underflowNode = parent;
 		
 		if (underflowNode == root) {
 			//만약 새로운 underflow 노드가 루트 노드이고 데이터가 하나도 없다면
 			//루트 노드를 병합한 노드로 교체한다. (병합한 노드는 '부족할' 가능성이 없는 노드이다)
 			if (underflowNode->count == 0) {
-				//cout << "root has no node.";
 				//만약 전체 트리가 비었다면 root를 NULL로 바꾼다.
 				if (underflowNode->children[0] == NULL) {
-				//	cout << "Tree is totally empty" << endl;
 					delete(underflowNode);
 					root = NULL;
 					break;
 				}
 
-				//cout << "changing root to left Tree : ";
 				root = saveEmptyLeft;
-				//for (int i = 0; i < root->count; i++) {
-				//	cout << root->data[i] << ' ';
-				//}
-				//cout << endl;
 				root->parent = NULL;
 				delete(underflowNode);
 				needsRebalancing = false;
@@ -460,15 +415,9 @@ void printTree(Node * Tree)
 	if (Tree == NULL) return;
 	int idx = 0;
 	for (; idx < Tree->count; idx++) {
-		//if(Tree->children[idx]!=NULL)
-			//cout << "childrend[" << idx << "]: ";
 		printTree(Tree->children[idx]);
-		//cout << "data[" << idx << "]: ";
 		cout << Tree->data[idx] << ' ';
-		//cout << endl;
 	}
-	//if(Tree->children[idx]!=NULL)
-		//cout << "childrend[" << idx << "]: ";
 	printTree(Tree->children[idx]);
 }
 

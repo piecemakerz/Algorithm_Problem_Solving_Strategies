@@ -98,8 +98,10 @@ void updateHeights(Node * Tree) {
 	if (Tree == NULL)
 		return;
 
+	//왼쪽 서브트리의 높이를 구한다.
 	if (Tree->left != NULL)
 		updateHeights(Tree->left);
+	//오른쪽 서브트리의 높이를 구한다.
 	if (Tree->right != NULL)
 		updateHeights(Tree->right);
 
@@ -115,6 +117,7 @@ void updateHeights(Node * Tree) {
 		Tree->height = 0;
 }
 
+//Tree를 루트노드로 하는 서브트리의 BF값을 갱신한다.
 void updateBalances(Node * Tree) {
 	if (Tree == NULL)
 		return;
@@ -140,7 +143,6 @@ void rebalance(Node * Tree) {
 	//현재 노드를 기준으로 회전을 한다.
 	while (Tree != NULL) {
 		if (Tree->BF < -1 || Tree->BF > 1) {
-			//cout << "needs rebalancing in node " << Tree->data << endl;
 			if (Tree->BF > 1) {
 				if (Tree->left != NULL && Tree->left->BF < 0) {
 					Tree = leftRotate(Tree->left);
@@ -175,6 +177,7 @@ void insertNode(int data) {
 	Node * prevNode = NULL;
 	Node * newNode = new Node(data);
 
+	//새로운 노드를 삽입할 위치 찾기
 	while (curNode != NULL) {
 		prevNode = curNode;
 		if (data < curNode->data)
@@ -201,14 +204,7 @@ void insertNode(int data) {
 //아래 레벨에 존재한다. 따라서 삭제할 노드의 오른쪽 자식이 NULL인
 //경우에 대한 예외처리를 하지 않아도 된다.
 Node* findSuccessor(Node* node) {
-	//if (node->right != NULL)
 	return findMinNode(node->right);
-
-	/*while (node->parent != NULL && node == node->parent->right) {
-	node = node->parent;
-	}
-	return node->parent;
-	*/
 }
 
 //코드가 매우 길다. 이진 검색 트리의 removeOtherNode()나 레드 블랙 트리 구현코드의 deleteNode()는
@@ -297,12 +293,8 @@ void removeNode(int data) {
 void printTree(Node* Tree)
 {
 	if (Tree == NULL) return;
-	//if(Tree->left != NULL)
-		//cout << "left child ";
 	printTree(Tree->left);
 	cout << Tree->data << ' ';
-	//if(Tree->right != NULL)
-		//cout << "right child ";
 	printTree(Tree->right);
 }
 
