@@ -4,7 +4,6 @@
 #include <algorithm>
 using namespace std;
 
-int C, N;
 //현재 다른 점에 지배당하지 않는 점들의 목록을 저장한다.
 //coords[x] = y
 map<int, int> coords;
@@ -59,16 +58,16 @@ int registered(int x, int y) {
 }
 
 int main(void) {
+	int C;
 	cin >> C;
 	for (int test = 0; test < C; test++) {
-		int prob, ramen, ret = 0, possCnt = 0;
+		int N, probcnt, ramen, ret = 0;
 		cin >> N;
 		for (int i = 0; i < N; i++) {
-			scanf("%d %d", &prob, &ramen);
-			p.insert(make_pair(prob, ramen));
+			scanf("%d %d", &probcnt, &ramen);
+			ret += registered(probcnt, ramen);
 		}
-		
 		cout << ret << endl;
-		p.clear();
+		coords.clear();
 	}
 }
