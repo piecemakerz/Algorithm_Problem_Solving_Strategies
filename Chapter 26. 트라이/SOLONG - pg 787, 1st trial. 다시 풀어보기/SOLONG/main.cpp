@@ -12,7 +12,7 @@ int C, N, M;
 const int ALPHAPETS = 26;
 int toNumber(char ch) { return ch - 'A'; }
 
-/*
+
 //내 풀이
 //wordToFreq[단어] = 출현 빈도
 map<string, int> wordToFreq;
@@ -125,9 +125,10 @@ int main(void) {
 			//해당 단어의 문자 수만큼 입력해야 한다.
 			if (freqit == wordToFreq.end())
 				ret += strlen(str);
-			else
+			else {
+				cout << root->find(str, "", findStr, freqit->second) << endl;
 				ret += root->find(str, "", findStr, freqit->second);
-			//스페이스바
+			}//스페이스바
 			ret += 1;
 		}
 		ret -= 1;
@@ -139,8 +140,8 @@ int main(void) {
 	}
 	return 0;
 }
-*/
 
+/*
 //책의 풀이
 struct TrieNode {
 	TrieNode* children[ALPHAPETS];
@@ -227,3 +228,4 @@ TrieNode* readInput(int words) {
 	trie->first = -1;
 	return trie;
 }
+*/
