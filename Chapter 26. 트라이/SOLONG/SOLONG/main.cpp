@@ -110,8 +110,8 @@ void randomGenerator(vector<pair<string, int>>& input, vector<pair<int, string>>
 	for (int i = 0; i < length; i++)
 		randStr += (char)(rand() % ALPHABETS + 'A');
 	generatedStr.push_back(randStr);
-
-	int priority = rand() % 100000 + 1;
+	int priority = rand() % 10 + 1;
+	cout << generatedStr.back() << ' ' << priority << endl;
 	input.push_back(make_pair(randStr, priority));
 	bookInput.push_back(make_pair(-priority, randStr));
 }
@@ -224,6 +224,7 @@ int main(void) {
 		sort(input.begin(), input.end());
 		sort(bookInput.begin(), bookInput.end());
 		for (int i = 0; i < N; i++) {
+			cout << input[i].first << endl;
 			root->insert(input[i].first.c_str(), input[i].second);
 		}
 
@@ -231,7 +232,7 @@ int main(void) {
 		for (int i = 0; i < bookInput.size(); i++)
 			trie->insert(bookInput[i].second.c_str(), i);
 		trie->first = -1;
-		//printTree(root, -1);
+		printTree(root, -1);
 
 		/*for (int i = 0; i < M; i++) {
 			char word[11];
@@ -240,11 +241,17 @@ int main(void) {
 		}
 		*/
 		for (int i = 0; i < generatedStr.size(); i++) {
+			int ret = types(root, generatedStr[i]);
+			cout << ret << ' ';
 			result += (types(root, generatedStr[i]) + 1);
 		}
+		cout << endl;
 		for (int i = 0; i < generatedStr.size(); i++) {
-			bookResult += (countKeys(trie, generatedStr[i].c_str()) + 1);
+			int ret = countKeys(trie, generatedStr[i].c_str());
+			cout << ret << ' ';
+			bookResult += (ret + 1);
 		}
+		cout << endl;
 		result--;
 		bookResult--;
 		cout << result << endl;
