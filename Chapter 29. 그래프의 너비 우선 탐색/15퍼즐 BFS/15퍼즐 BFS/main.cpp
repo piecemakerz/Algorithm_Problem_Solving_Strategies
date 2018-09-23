@@ -182,7 +182,7 @@ int bidirectional(State start, State finish) {
 				c[adjacent[i]] = incr(c[here]);
 				q.push(adjacent[i]);
 			}
-			//가운데서 만난 경우
+			//가운데서 만난 경우 (부호가 다르다면 가운데서 만난 경우이다)
 			else if (sgn(it->second) != sgn(c[here]))
 				return abs(it->second) + abs(c[here]) - 1;
 		}
@@ -208,6 +208,8 @@ void dfs(State here, const State& finish, int steps) {
 }
 //점점 깊어지는 탐색
 int ids(State start, State finish, int growthStep) {
+	//한계 깊이 4부터 시작한다. 이후 최단경로를 찾지 못했다면
+	//한계 깊이를 growthStep만큼 늘려 다시 탐색한다.
 	for (int limit = 4; ; limit += growthStep) {
 		best = limit + 1;
 		dfs(start, finish, 0);
