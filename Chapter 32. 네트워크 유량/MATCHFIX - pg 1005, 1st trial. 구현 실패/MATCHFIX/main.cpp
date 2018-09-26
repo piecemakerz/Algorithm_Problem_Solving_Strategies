@@ -46,38 +46,29 @@ int networkFlow(int source, int sink) {
 	return totalFlow;
 }
 
-//인접 리스트로 포드-폴커슨 알고리즘 구현하기
-
-//간선의 정보를 나타내는 구조체
-struct Edge {
-	int target, capacity, flow;
-	//역방향 간선의 포인터
-	Edge* reverse;
-	//이 간선의 잔여 용량을 계산한다.
-	int residualCapacity() const {
-		return capacity - flow;
+//네트워크 유량을 통해 승부 조작 문제를 해결하는 함수의 구현
+int n, m;
+int wins[20], match[200][2];
+//0번 선수가 총 totalWins승으로 우승할 수 있는지 여부를 확인한다.
+bool canWinWith(int totalWins) {
+	//이미 totalWins승 이상 한 선수가 있으면 안된다.
+	if (*max_element(wins + 1, wins + n) >= totalWins)
+		return false;
+	//0번은 소스, 1번은 싱크
+	V = 2 + m + n;
+	memset(capacity, 0, sizeof(capacity));
+	for (int i = 0; i < m; i++) {
+		//소스에서 각 경기로 가는 간선
+		capacity[0][2 + i] = 1;
+		//각 경기에서 두 선수로 가는 간선
+		for (int j = 0; j < 2; j++)
+			capacity[2 + i][2 + m + match[i][j]] = 1;
 	}
-	//이 간선을 따라 용량 amt를 보낸다.
-	void push(int amt) {
-		flow += amt;
-		reverse->flow -= amt;
+	//각 선수에서 싱크로, 가능한 최대 승수를 용량으로 하는 간선을 추가
+	for (int i = 0; i < n; i++) {
+		int maxWin = (i == 0 ? totalWins : totalWins - 1);
+		capacity[2 + m + i][1] = maxWin - wins[i];
 	}
-};
-//유량 네트워크의 인접 리스트
-vector<Edge*> adj[MAX_V];
-//u에서 v로 가는 간선을 추가한다.
-void addEdge(int u, int v, int capacity) {
-	Edge* uv = new Edge(), *vu = new Edge();
-	//u에서 v로 가는 간선을 초기화한다.
-	uv->target = v;
-	uv->capacity = capacity;
-	uv->flow = 0;
-	uv->reverse = vu;
-	//v에서 u로 가는 간선을 초기화한다. 이 간선의 용량은 0이다.
-	vu->target = u;
-	vu->capacity = 0;
-	vu->flow = 0;
-	vu->reverse = uv;
-	adj[u].push_back(uv);
-	adj[v].push_back(vu);
+	//이때 모든 경기에 승자를 지정할 수 있는가?
+	return networkFlow(0, 1) == m;
 }
